@@ -168,11 +168,12 @@ END:VCALENDAR`;
       });
       formDataObj.append('timestamp', new Date().toISOString());
 
-      await fetch(googleScriptUrl, {
+      const response = await fetch(googleScriptUrl, {
         method: 'POST',
         body: formDataObj,
-        mode: 'no-cors' 
+        mode: 'cors'
       });
+      if (!response.ok) throw new Error(`RSVP request failed: ${response.status}`);
 
       setStatus('success');
     } catch (error) {
