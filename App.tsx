@@ -139,6 +139,7 @@ const App: React.FC = () => {
   }
 
   const [data, setData] = useState<WeddingData>(DEFAULT_DATA);
+  const [assetVersion] = useState(() => Date.now().toString());
   
   // App Modes
   const [isAdminAvailable, setIsAdminAvailable] = useState(false);
@@ -440,11 +441,15 @@ const App: React.FC = () => {
   
   const isRsvpClosed = (() => {
     if (!data.rsvpDeadline) return false;
-    const deadline = new Date(data.rsvpDeadline);
+    const deadline = /^\d{4}-\d{2}-\d{2}$/.test(data.rsvpDeadline)
+      ? new Date(`${data.rsvpDeadline}T23:59:59.999`)
+      : new Date(data.rsvpDeadline);
     if (isNaN(deadline.getTime())) return false;
-    deadline.setHours(23, 59, 59, 999);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data.rsvpDeadline)) deadline.setHours(23, 59, 59, 999);
     return new Date() > deadline;
   })();
+
+  const cacheBustedAsset = (url: string) => url ? `${url}${url.includes('?') ? '&' : '?'}v=${assetVersion}` : url;
 
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
@@ -525,7 +530,7 @@ const App: React.FC = () => {
       ) : (
         <>
         <header className="relative h-screen min-h-[700px] flex items-center justify-center text-center overflow-hidden">
-            <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${data.images?.hero || DEFAULT_DATA.images.hero})` }} />
+            <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${cacheBustedAsset(data.images?.hero || DEFAULT_DATA.images.hero)})` }} />
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
@@ -571,7 +576,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className="aspect-[3/4] overflow-hidden relative shadow-md bg-white p-2">
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={data.images.groom} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                              </div>
                         </div>
                         <div className="mt-6">
@@ -586,7 +591,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className="aspect-[3/4] overflow-hidden relative shadow-md bg-white p-2">
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={data.images.bride} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                              </div>
                         </div>
                          <div className="mt-6">
@@ -656,7 +661,7 @@ const App: React.FC = () => {
                     <div className="columns-2 md:columns-3 gap-3 space-y-3">
                         {data.gallery.map((img, idx) => (
                             <div key={idx} className="break-inside-avoid overflow-hidden rounded-sm shadow-sm">
-                                <img src={img} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" loading="lazy" onError={(e) => { const c = (e.currentTarget as HTMLElement).closest('.break-inside-avoid') as HTMLElement; if (c) c.style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" loading="lazy" onError={(e) => { const c = (e.currentTarget as HTMLElement).closest('.break-inside-avoid') as HTMLElement; if (c) c.style.display = 'none'; }} />
                             </div>
                         ))}
                     </div>

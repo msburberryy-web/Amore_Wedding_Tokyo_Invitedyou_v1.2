@@ -242,13 +242,17 @@ const PhotoUpload: React.FC<Props> = ({ event, lang, setLang }) => {
 
     // Phase 2: one commit for all blobs → one deploy
     try {
-      await fetch(`${API_BASE}/api/commit-photos`, {
+      const response = await fetch(`${API_BASE}/api/commit-photos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event, passphrase: passphrase.trim(), blobs })
       });
+      if (!response.ok) throw new Error('commit failed');
     } catch {
-      // Network timeout on commit — blobs are safe, commit likely succeeded
+      entries.forEach(({ mark }) => mark('error', t.uploadError));
+      setGlobalError(t.uploadError);
+      setIsUploading(false);
+      return;
     }
 
     entries.forEach(({ mark }) => mark('done'));
