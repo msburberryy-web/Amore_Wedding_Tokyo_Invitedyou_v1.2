@@ -157,11 +157,11 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/khin_shwe/gallery1.jpg",
-    "./photos/khin_shwe/gallery2.jpg",
-    "./photos/khin_shwe/gallery3.jpg",
-    "./photos/khin_shwe/gallery4.jpg",
-    "./photos/khin_shwe/gallery5.jpg"
+    "./photos/[event-folder]/gallery1.jpg",
+    "./photos/[event-folder]/gallery2.jpg",
+    "./photos/[event-folder]/gallery3.jpg",
+    "./photos/[event-folder]/gallery4.jpg",
+    "./photos/[event-folder]/gallery5.jpg"
   ],
   "musicUrl": "",
   "images": {
