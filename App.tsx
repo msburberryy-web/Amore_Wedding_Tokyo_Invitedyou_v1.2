@@ -702,7 +702,7 @@ const App: React.FC = () => {
               ) : (
                 <>
                   {data.rsvpDeadline && (
-                    <div className="inline-block px-10 py-4 mb-8 rounded-2xl bg-wedding-gold/10 border border-wedding-gold/30">
+                    <div className="block w-fit mx-auto px-10 py-4 mb-8 rounded-2xl bg-wedding-gold/10 border border-wedding-gold/30">
                       <p className="text-xs font-bold uppercase tracking-[0.2em] text-wedding-gold">{t.rsvpDeadlineLabel}</p>
                       <p className="mt-1 font-serif text-xl text-wedding-text">{formatDeadline(data.rsvpDeadline)}</p>
                     </div>
