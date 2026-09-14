@@ -32,6 +32,7 @@ const TRANSLATIONS = {
     gallery: "Gallery",
     rsvp: "RSVP",
     rsvpNote: "Please respond by filling out the form below.",
+    rsvpDeadlineLabel: "RSVP Deadline",
     rsvpClosed: "RSVP is now closed.",
     rsvpClosedNote: "The RSVP deadline has passed. Thank you to everyone who responded.",
     presentedBy: "Presented by Amoré Wedding Tokyo",
@@ -51,6 +52,7 @@ const TRANSLATIONS = {
     gallery: "写真",
     rsvp: "出欠",
     rsvpNote: "以下のフォームよりご回答をお願いいたします。",
+    rsvpDeadlineLabel: "ご回答期限",
     rsvpClosed: "受付は終了しました。",
     rsvpClosedNote: "返信期限が過ぎました。ご回答いただいた皆様、ありがとうございました。",
     presentedBy: "Presented by Amoré Wedding Tokyo",
@@ -70,6 +72,7 @@ const TRANSLATIONS = {
     gallery: "အမှတ်တရများ",
     rsvp: "အကြောင်းပြန်ရန်",
     rsvpNote: "ကျေးဇူးပြု၍ အောက်ပါပုံစံကိုဖြည့်ပါ",
+    rsvpDeadlineLabel: "အကြောင်းပြန်ရန် နောက်ဆုံးရက်",
     rsvpClosed: "RSVP ပိတ်သွားပြီဖြစ်ပါသည်။",
     rsvpClosedNote: "RSVP နောက်ဆုံးရက် ကျော်လွန်သွားပါပြီ။ အကြောင်းပြန်ပေးသူများအားလုံးကို ကျေးဇူးတင်ပါသည်။",
     presentedBy: "Amoré Wedding Tokyo မှ တင်ဆက်သည်",
@@ -408,6 +411,14 @@ const App: React.FC = () => {
   };
   const { googleUrl, downloadIcs } = generateCalendarLinks();
 
+  const formatDeadline = (raw: string) => {
+    const deadlineDate = new Date(raw);
+    return isNaN(deadlineDate.getTime())
+      ? raw
+      : deadlineDate.toLocaleDateString(lang === 'en' ? 'en-US' : lang === 'ja' ? 'ja-JP' : 'en-GB', {
+          year: 'numeric', month: 'long', day: 'numeric'
+        });
+  };
   const processFaqText = (text: string) => {
     let processed = text;
     if (processed.includes('{{time}}')) {
@@ -416,13 +427,7 @@ const App: React.FC = () => {
       processed = processed.replace(/{{time}}/g, clockTime);
     }
     if (processed.includes('{{deadline}}')) {
-      const deadlineDate = new Date(data.rsvpDeadline);
-      const formattedDeadline = isNaN(deadlineDate.getTime()) 
-        ? data.rsvpDeadline 
-        : deadlineDate.toLocaleDateString(lang === 'en' ? 'en-US' : lang === 'ja' ? 'ja-JP' : 'en-GB', {
-            year: 'numeric', month: 'long', day: 'numeric'
-          });
-      processed = processed.replace(/{{deadline}}/g, formattedDeadline);
+      processed = processed.replace(/{{deadline}}/g, formatDeadline(data.rsvpDeadline));
     }
     if (processed.includes('{{end_time}}')) processed = processed.replace(/{{end_time}}/g, data.end_time || '13:00');
     return processed;
@@ -696,6 +701,12 @@ const App: React.FC = () => {
                 </div>
               ) : (
                 <>
+                  {data.rsvpDeadline && (
+                    <div className="inline-block px-10 py-4 mb-8 rounded-2xl bg-wedding-gold/10 border border-wedding-gold/30">
+                      <p className="text-xs font-bold uppercase tracking-[0.2em] text-wedding-gold">{t.rsvpDeadlineLabel}</p>
+                      <p className="mt-1 font-serif text-xl text-wedding-text">{formatDeadline(data.rsvpDeadline)}</p>
+                    </div>
+                  )}
                   <div className="border border-wedding-gold p-1 inline-block rounded-full">
                     <button onClick={() => setView('rsvp')} className="w-full md:w-auto px-16 py-4 bg-wedding-gold text-white font-serif text-xl tracking-widest uppercase hover:bg-wedding-text transition-colors rounded-full shadow-lg">{t.rsvp}</button>
                   </div>
