@@ -50,7 +50,11 @@ export interface WeddingData {
     mapUrl: string;
   };
   message: LocalizedString;
-  googleFormUrl: string; 
+  familyIntro?: { // Optional traditional family-introduction text (e.g. Burmese parents/siblings preamble)
+    show: boolean;
+    text: LocalizedString;
+  };
+  googleFormUrl: string;
   googleScriptUrl: string; 
   showSchedule: boolean; 
   schedule: ScheduleItem[];
