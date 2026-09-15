@@ -562,7 +562,14 @@ const App: React.FC = () => {
           </header>
 
           <main className="max-w-4xl mx-auto bg-white relative z-20 shadow-2xl pb-12">
-            
+
+            {/* Family Introduction Section (optional, per-couple traditional preamble) */}
+            {data.familyIntro?.show && data.familyIntro.text[lang] && (
+              <section className="text-center pt-24 pb-4 px-8 md:px-12 bg-white">
+                <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.familyIntro.text[lang]}</p>
+              </section>
+            )}
+
             {/* Greeting Section */}
             <section className="text-center pt-24 pb-16 px-8 md:px-12 bg-white">
               <div className="mb-12 flex flex-col items-center">
