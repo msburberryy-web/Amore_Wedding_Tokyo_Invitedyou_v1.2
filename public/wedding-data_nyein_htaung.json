@@ -5,9 +5,9 @@
     "my": "Nyein Wai Lwin"
   },
   "brideName": {
-    "en": "May Myat Mon",
-    "ja": "May Myat Mon",
-    "my": "May Myat Mon"
+    "en": "Htaung Htaung",
+    "ja": "Htaung Htaung",
+    "my": "Htaung Htaung"
   },
   "date": "2026-11-22",
   "showCountdown": true,
@@ -156,9 +156,9 @@
   ],
   "musicUrl": "",
   "images": {
-    "hero": "./photos/nyein_may/cover.jpg",
-    "groom": "./photos/nyein_may/groom.jpg",
-    "bride": "./photos/nyein_may/bride.jpg"
+    "hero": "./photos/nyein_htaung/cover.jpg",
+    "groom": "./photos/nyein_htaung/groom.jpg",
+    "bride": "./photos/nyein_htaung/bride.jpg"
   },
   "theme": {
     "primary": "#C5A059",
