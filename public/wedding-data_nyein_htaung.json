@@ -151,8 +151,10 @@
     "./photos/[event-folder]/gallery1.jpg",
     "./photos/[event-folder]/gallery2.jpg",
     "./photos/[event-folder]/gallery3.jpg",
-    "./photos/[event-folder]/gallery4.jpg",
-    "./photos/[event-folder]/gallery5.jpg"
+    "https://lh3.googleusercontent.com/d/1d_PkidgkguJvRY1peUnZaSgo61wKhKtI",
+    "https://lh3.googleusercontent.com/d/1WVcjoHEF4R1VRUEgMh3YmIma8iuFlsuU",
+    "https://lh3.googleusercontent.com/d/1Gyh_GEqatWnFg7nCzPhAnBzOmybXVjNx",
+    "https://lh3.googleusercontent.com/d/1c_Bq2a15mT5b0NzL-iK4GfDkCgQO0wH3"
   ],
   "musicUrl": "",
   "images": {
