@@ -26,8 +26,15 @@ for (const folder of folders) {
 
   if (galleryFiles.length === 0) continue;
 
-  const newGallery = galleryFiles.map(f => `./photos/[event-folder]/${f}`);
+  const newLocal = galleryFiles.map(f => `./photos/[event-folder]/${f}`);
   const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
+  // Preserve any hotlinked (http/https) gallery entries — those are photos
+  // too large for this repo's storage and are intentionally external.
+  const existingRemote = (Array.isArray(data.gallery) ? data.gallery : [])
+    .filter(g => /^https?:\/\//i.test(g));
+
+  const newGallery = [...newLocal, ...existingRemote];
 
   if (JSON.stringify(data.gallery) === JSON.stringify(newGallery)) continue;
 
