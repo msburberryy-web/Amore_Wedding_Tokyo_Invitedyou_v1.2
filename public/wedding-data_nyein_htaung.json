@@ -35,15 +35,6 @@
   "showSchedule": true,
   "schedule": [
     {
-      "time": "16:30",
-      "title": {
-        "en": "Banquet Begins",
-        "ja": "開宴",
-        "my": "မင်္ဂလာဧည့်ခံပွဲ စတင်ခြင်း"
-      },
-      "icon": "party"
-    },
-    {
       "time": "18:30",
       "title": {
         "en": "Reception",
@@ -51,6 +42,15 @@
         "my": "ဧည့်ခံခြင်း"
       },
       "icon": "reception"
+    },
+    {
+      "time": "19:00",
+      "title": {
+        "en": "Banquet Begins",
+        "ja": "開宴",
+        "my": "မင်္ဂလာဧည့်ခံပွဲ စတင်ခြင်း"
+      },
+      "icon": "party"
     }
   ],
   "faq": [
