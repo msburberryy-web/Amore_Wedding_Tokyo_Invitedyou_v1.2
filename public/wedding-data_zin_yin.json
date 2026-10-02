@@ -1,0 +1,177 @@
+{
+  "groomName": {
+    "en": "Zin Min Aung",
+    "ja": "ジンミンアウン",
+    "my": "ဇင်မင်းအောင်"
+  },
+  "brideName": {
+    "en": "Yin Min Paing",
+    "ja": "ヤインミンパイン",
+    "my": "ယဉ်မင်းပိုင်"
+  },
+  "date": "2026-11-28",
+  "showCountdown": true,
+  "rsvpDeadline": "2026-10-25",
+  "location": {
+    "name": {
+      "en": "Marry Grant Akasaka (Sea Blue)",
+      "ja": "Marry Grant Akasaka (Sea Blue)",
+      "my": "Marry Grant Akasaka (Sea Blue)"
+    },
+    "address": {
+      "en": "〒107-0052 Tokyo, Minato City, Akasaka 2 Chome-14-5 Daiwa Akasaka Building",
+      "ja": "〒107-0052 東京都港区赤坂２丁目１４−5 Daiwa赤坂ビル",
+      "my": "〒107-0052 Tokyo, Minato City, Akasaka 2 Chome-14-5 Daiwa Akasaka Building"
+    },
+    "mapUrl": "https://maps.google.com/maps?q=Marry%20Grant%20Akasaka%20%28Sea%20Blue%29%20%E3%80%92107-0052%20%E6%9D%B1%E4%BA%AC%E9%83%BD%E6%B8%AF%E5%8C%BA%E8%B5%A4%E5%9D%82%EF%BC%92%E4%B8%81%E7%9B%AE%EF%BC%91%EF%BC%94%E2%88%925%20Daiwa%E8%B5%A4%E5%9D%82%E3%83%93%E3%83%AB&z=17&output=embed"
+  },
+  "message": {
+    "en": "We invite you to share in our joy as we exchange marriage vows.",
+    "ja": "このたび 私たちは結婚することになりました\n皆様に見守られながら 新しい人生の第一歩を踏み出したいと存じます",
+    "my": "ကျွန်ုပ်တို့၏ မင်္ဂလာပွဲသို့ ကြွရောက်ချီးမြှင့်ပါရန် ဖိတ်ကြားအပ်ပါသည်။"
+  },
+  "googleFormUrl": "",
+  "googleScriptUrl": "",
+  "showSchedule": true,
+  "schedule": [
+    {
+      "time": "17:30",
+      "title": {
+        "en": "Reception",
+        "ja": "受付開始",
+        "my": "ဧည့်ခံခြင်း"
+      },
+      "icon": "reception"
+    },
+    {
+      "time": "18:00",
+      "title": {
+        "en": "Banquet Begins",
+        "ja": "開宴",
+        "my": "မင်္ဂလာဧည့်ခံပွဲ စတင်ခြင်း"
+      },
+      "icon": "party"
+    }
+  ],
+  "faq": [
+    {
+      "question": {
+        "en": "Can I bring a +1?",
+        "ja": "同伴者を連れて行ってもいいですか？",
+        "my": "ဧည့်သည်အပို ခေါ်လာလို့ရပါသလား?"
+      },
+      "answer": {
+        "en": "We kindly ask that only those who received this invitation attend. If you are bringing a plus one, please register them in the RSVP form so we can arrange for you to be seated together.",
+        "ja": "お席の都合上、ご招待申し上げた方のみのご出席をお願いしております。お連れ様がいらっしゃる場合は、お席を隣同士でご用意いたしますので、RSVPフォームにてお知らせください。",
+        "my": "နေရာထိုင်ခင်း အခက်အခဲရှိပါသဖြင့် ဖိတ်ကြားထားသူများသာ တက်ရောက်ပေးပါရန် မေတ္တာရပ်ခံပါသည်။ အဖော်ခေါ်လာမည်ဆိုပါက နေရာအတူတကွစီစဉ်နိုင်ရန် RSVP တွင် ဖြည့်စွက်ပေးပါ။"
+      },
+      "icon": "users"
+    },
+    {
+      "question": {
+        "en": "What should I wear?",
+        "ja": "服装の指定はありますか？",
+        "my": "ဘာဝတ်ဆင်ရမလဲ?"
+      },
+      "answer": {
+        "en": "Formal attire is requested.",
+        "ja": "フォーマルな服装でお越しください。",
+        "my": "Formal ဝတ်စုံ ဝတ်ဆင်ပေးပါရန် မေတ္တာရပ်ခံပါသည်။"
+      },
+      "icon": "shirt"
+    },
+    {
+      "question": {
+        "en": "What time should I arrive?",
+        "ja": "何時に到着すればいいですか？",
+        "my": "ဘယ်အချိန်အရောက်လာရမလဲ?"
+      },
+      "answer": {
+        "en": "The ceremony begins at {{time}}. Please arrive 20 minutes early.",
+        "ja": "挙式は{{time}}に始まります。20分前にはお越しください。",
+        "my": "မင်္ဂလာပွဲသည် {{time}} တွင် စတင်မည်ဖြစ်ပါသဖြင့် မိနစ် ၂၀ ကြိုတင်ရောက်ရှိပေးပါ။"
+      },
+      "icon": "clock"
+    },
+    {
+      "question": {
+        "en": "Is parking available?",
+        "ja": "駐車場はありますか？",
+        "my": "ကားပါကင်ရှိပါသလား?"
+      },
+      "answer": {
+        "en": "Unfortunately, parking is not available at the venue. Please use nearby public parking.",
+        "ja": "申し訳ございませんが、会場に専用駐車場はございません。近隣のコインパーキングをご利用ください。",
+        "my": "ကားပါကင်မရှိပါ။ ကျေးဇူးပြု၍ အနီးနားရှိ အခပေးကားပါကင်ကို အသုံးပြုပါ။"
+      },
+      "icon": "map"
+    },
+    {
+      "question": {
+        "en": "I have a dietary restriction.",
+        "ja": "アレルギーがあります。",
+        "my": "မတည့်သည့် အစားအသောက်များ ရှိပါက?"
+      },
+      "answer": {
+        "en": "Please let us know when you RSVP so we can accommodate your needs.",
+        "ja": "RSVPフォームにてお知らせください。対応させていただきます。",
+        "my": "ကျေးဇူးပြု၍ RSVP ပုံစံတွင် ဖြည့်စွက်ဖော်ပြပေးပါ။"
+      },
+      "icon": "utensils"
+    },
+    {
+      "question": {
+        "en": "What is the deadline to RSVP?",
+        "ja": "返信期限はいつですか？",
+        "my": "ဘယ်တော့နောက်ဆုံး အကြောင်းပြန်ရမလဲ?"
+      },
+      "answer": {
+        "en": "Please RSVP by {{deadline}}.",
+        "ja": "{{deadline}}までにご返信をお願いいたします。",
+        "my": "{{deadline}} နောက်ဆုံးထား၍ အကြောင်းပြန်ပေးပါ။"
+      },
+      "icon": "calendar"
+    },
+    {
+      "question": {
+        "en": "Note for guests with children",
+        "ja": "お子様連れでご参列の皆様へ",
+        "my": "ကလေးငယ်များဖြင့် တက်ရောက်မည့် ဧည့်သည်များအတွက် မှတ်ချက်"
+      },
+      "answer": {
+        "en": "We would love for your little ones to join us! To help us coordinate seating and special meal requirements, please kindly include the number of children, their ages, and any food allergies or dietary restrictions in the RSVP form.",
+        "ja": "お子様と一緒にご参列いただけることを楽しみにしております。お席やキッズミールをスムーズにご用意させていただくため、大変お手数ですが、RSVPフォームにて「お子様の人数」「ご年齢」「食物アレルギーの有無」をご記入いただけますと幸いです。",
+        "my": "ကျွန်ုပ်တို့၏ မင်္ဂလာပွဲသို့ ကလေးငယ်များ ခေါ်ဆောင်လာမည်ဆိုပါက နေရာထိုင်ခင်းနှင့် အစားအသောက်များကို ကြိုတင်စီစဉ်နိုင်ရန် RSVP form တွင် ကလေးဦးရေ၊ အသက်အရွယ် နှင့် အစားအသောက် ဓာတ်မတည့်မှု ရှိ/မရှိ တို့ကို ဖြည့်စွက်ပေးပါရန် လေးစားစွာ မေတ္တာရပ်ခံအပ်ပါသည်။"
+      },
+      "icon": "baby"
+    }
+  ],
+  "showGallery": true,
+  "gallery": [
+    "./photos/zin_yin/gallery1.jpg",
+    "./photos/zin_yin/gallery2.jpg",
+    "./photos/zin_yin/gallery3.jpg",
+    "./photos/zin_yin/gallery4.jpg",
+    "./photos/zin_yin/gallery5.jpg"
+  ],
+  "musicUrl": "",
+  "images": {
+    "hero": "./photos/zin_yin/cover.jpg",
+    "groom": "./photos/zin_yin/groom.jpg",
+    "bride": "./photos/zin_yin/bride.jpg"
+  },
+  "theme": {
+    "primary": "#C5A059",
+    "text": "#4A4A4A",
+    "backgroundTint": "#F5F0E6"
+  },
+  "fonts": {
+    "en": "\"Cormorant Garamond\"",
+    "ja": "\"Shippori Mincho\"",
+    "my": "\"Padauk\""
+  },
+  "visuals": {
+    "enableAnimations": true,
+    "enableEnvelope": true
+  }
+}
