@@ -156,9 +156,9 @@
   ],
   "musicUrl": "",
   "images": {
-    "hero": "./photos/yan_aye/cover.jpg",
+    "hero": "https://lh3.googleusercontent.com/d/1GU5RPDEuQTbnkIJOkrD55h5XBSKvrT41",
     "groom": "./photos/yan_aye/groom.jpg",
-    "bride": "./photos/yan_aye/bride.jpg"
+    "bride": "https://lh3.googleusercontent.com/d/16uVMkmQGiOce7s9PACpz3a6dWq6cc9Ww"
   },
   "theme": {
     "primary": "#C5A059",
