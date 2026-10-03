@@ -677,7 +677,7 @@ const App: React.FC = () => {
                     <div className="columns-2 md:columns-3 gap-3 space-y-3">
                         {data.gallery.map((img, idx) => (
                             <div key={idx} className="break-inside-avoid overflow-hidden rounded-sm shadow-sm">
-                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" loading="lazy" onError={(e) => { const c = (e.currentTarget as HTMLElement).closest('.break-inside-avoid') as HTMLElement; if (c) c.style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" onError={(e) => { const c = (e.currentTarget as HTMLElement).closest('.break-inside-avoid') as HTMLElement; if (c) c.style.display = 'none'; }} />
                             </div>
                         ))}
                     </div>
