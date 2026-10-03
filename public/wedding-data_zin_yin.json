@@ -148,17 +148,17 @@
   ],
   "showGallery": true,
   "gallery": [
-    "https://lh3.googleusercontent.com/d/1SAilCTg9LQwXmuJgnWuHfFyx1eW5EirT=s1600",
-    "https://lh3.googleusercontent.com/d/1llqtdd9fcYMkW_EDrsg1BlA3HkJaP1DK=s1600",
-    "https://lh3.googleusercontent.com/d/1--NHuXL6GRgotlRFSU10sUjuKzPuN0qm=s1600",
-    "https://lh3.googleusercontent.com/d/15FviTuG5zVAsczaSKeXpJllaPHYXLtuO=s1600",
-    "https://lh3.googleusercontent.com/d/1XNi5eGn5p-TbRVwEB7ojF0_lrQsRaq6E=s1600"
+    "./photos/zin_yin/gallery1.jpg",
+    "./photos/zin_yin/gallery2.jpg",
+    "./photos/zin_yin/gallery3.jpg",
+    "./photos/zin_yin/gallery4.jpg",
+    "./photos/zin_yin/gallery5.jpg"
   ],
   "musicUrl": "",
   "images": {
-    "hero": "https://lh3.googleusercontent.com/d/1Qltxjr700U2mV39UoWpp6Fm_LVBQU3P-=s1600",
-    "groom": "https://lh3.googleusercontent.com/d/1ifjlAU-jnpz4tU2szvEts4d_SwgV0p5E=s1600",
-    "bride": "https://lh3.googleusercontent.com/d/1DcNDlEKrC2OVIf4lIyQm2KM8Ar5mLc8B=s1600"
+    "hero": "./photos/zin_yin/cover.jpg",
+    "groom": "./photos/zin_yin/groom.jpg",
+    "bride": "./photos/zin_yin/bride.jpg"
   },
   "theme": {
     "primary": "#C5A059",
