@@ -21,8 +21,8 @@
  * Source photos are often straight-off-camera originals (20+ MP, 10-25MB,
  * no resizing) — committing those as-is bloats the repo and can silently
  * fail to render on memory-constrained mobile browsers. Every downloaded
- * image is resized (max 2000px on the long edge, EXIF-rotated, re-encoded
- * as JPEG q82) before being written to disk, regardless of source format.
+ * image is resized (max 1200px on the long edge, EXIF-rotated, re-encoded
+ * as JPEG q72) before being written to disk, regardless of source format.
  */
 
 import https from 'https';
@@ -41,8 +41,8 @@ if (!FOLDER_ID || !EVENT_FOLDER) {
   process.exit(1);
 }
 
-const MAX_DIMENSION = 2000; // px, long edge
-const JPEG_QUALITY = 82;
+const MAX_DIMENSION = 1200; // px, long edge
+const JPEG_QUALITY = 72;
 
 // ── Google Service Account Auth ───────────────────────────────────────────────
 
