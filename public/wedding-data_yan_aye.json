@@ -148,16 +148,16 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/yan_aye/gallery1.jpg",
-    "./photos/yan_aye/gallery2.jpg",
-    "./photos/yan_aye/gallery3.jpg",
-    "./photos/yan_aye/gallery4.jpg",
-    "./photos/yan_aye/gallery5.jpg"
+    "https://lh3.googleusercontent.com/d/1tySGhPCE10QK--Htkfmy_LXHBThwoBza",
+    "https://lh3.googleusercontent.com/d/1hYb2VGAZuRAggwb2y7lyFW0GrCfd7TyS",
+    "https://lh3.googleusercontent.com/d/1RZdrdYvoR3q2704JEVLi5_l1Ng4Gior5",
+    "https://lh3.googleusercontent.com/d/1V0Oq7XtjofvIisGJR5rePhJB5iuxQ_Ae",
+    "https://lh3.googleusercontent.com/d/1v9xHlehzZwBHEZGriwidgZZ_f5jNVioe"
   ],
   "musicUrl": "",
   "images": {
     "hero": "https://lh3.googleusercontent.com/d/1GU5RPDEuQTbnkIJOkrD55h5XBSKvrT41",
-    "groom": "./photos/yan_aye/groom.jpg",
+    "groom": "https://lh3.googleusercontent.com/d/1NNfagWH3mmBJWS73tj9pjSXCeTS3CAPb",
     "bride": "https://lh3.googleusercontent.com/d/16uVMkmQGiOce7s9PACpz3a6dWq6cc9Ww"
   },
   "theme": {
