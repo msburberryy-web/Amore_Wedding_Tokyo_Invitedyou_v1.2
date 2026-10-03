@@ -5,7 +5,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
   workflow_run:
-    workflows: ["Sync Wedding Couples"]
+    workflows: ["Sync Wedding Couples", "Sync Photos from Drive"]
     types: [completed]
     branches: [main]
 
