@@ -12,6 +12,10 @@
   "date": "2026-11-22",
   "showCountdown": true,
   "rsvpDeadline": "2026-10-25",
+  "dressCode": {
+    "show": true,
+    "colors": ["#bfa6c5", "#f3e5ab"]
+  },
   "location": {
     "name": {
       "en": "Alice aqua garden Tokyo Ginza",
