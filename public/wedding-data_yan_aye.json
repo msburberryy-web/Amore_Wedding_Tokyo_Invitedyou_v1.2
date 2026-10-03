@@ -14,7 +14,10 @@
   "rsvpDeadline": "2026-10-25",
   "dressCode": {
     "show": true,
-    "colors": ["#bfa6c5", "#f3e5ab"]
+    "colors": [
+      "#bfa6c5",
+      "#f3e5ab"
+    ]
   },
   "location": {
     "name": {
@@ -152,17 +155,17 @@
   ],
   "showGallery": true,
   "gallery": [
-    "https://lh3.googleusercontent.com/d/1tySGhPCE10QK--Htkfmy_LXHBThwoBza=s1600",
-    "https://lh3.googleusercontent.com/d/1hYb2VGAZuRAggwb2y7lyFW0GrCfd7TyS=s1600",
-    "https://lh3.googleusercontent.com/d/1RZdrdYvoR3q2704JEVLi5_l1Ng4Gior5=s1600",
-    "https://lh3.googleusercontent.com/d/1V0Oq7XtjofvIisGJR5rePhJB5iuxQ_Ae=s1600",
-    "https://lh3.googleusercontent.com/d/1v9xHlehzZwBHEZGriwidgZZ_f5jNVioe=s1600"
+    "./photos/yan_aye/gallery1.jpg",
+    "./photos/yan_aye/gallery2.jpg",
+    "./photos/yan_aye/gallery3.jpg",
+    "./photos/yan_aye/gallery4.jpg",
+    "./photos/yan_aye/gallery5.jpg"
   ],
   "musicUrl": "",
   "images": {
-    "hero": "https://lh3.googleusercontent.com/d/1GU5RPDEuQTbnkIJOkrD55h5XBSKvrT41=s1600",
-    "groom": "https://lh3.googleusercontent.com/d/1NNfagWH3mmBJWS73tj9pjSXCeTS3CAPb=s1600",
-    "bride": "https://lh3.googleusercontent.com/d/16uVMkmQGiOce7s9PACpz3a6dWq6cc9Ww=s1600"
+    "hero": "./photos/yan_aye/cover.jpg",
+    "groom": "./photos/yan_aye/groom.jpg",
+    "bride": "./photos/yan_aye/bride.jpg"
   },
   "theme": {
     "primary": "#C5A059",
