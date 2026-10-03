@@ -454,7 +454,11 @@ const App: React.FC = () => {
     return new Date() > deadline;
   })();
 
-  const cacheBustedAsset = (url: string) => url ? `${url}${url.includes('?') ? '&' : '?'}v=${assetVersion}` : url;
+  const cacheBustedAsset = (url: string) => {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url; // external hosts (e.g. hotlinked Drive photos) never need our deploy cache-bust
+    return `${url}${url.includes('?') ? '&' : '?'}v=${assetVersion}`;
+  };
 
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
