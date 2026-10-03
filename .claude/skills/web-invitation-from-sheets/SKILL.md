@@ -92,6 +92,15 @@ Use `DEFAULT_DATA` for any field not in the source:
 
 Note: `images.hero` is rendered as the big background photo behind the hero header text — it is a real, visible slot in this repo (confirm this is still true if the component code changes), not a vestigial field.
 
+## Optional Per-Couple Features
+
+Neither of these appears in `DEFAULT_DATA` and neither should be added for a couple unless they specifically ask for it — both are opt-in, `show`-gated fields:
+
+- **`familyIntro`** — `{ show: boolean; text: LocalizedString }`. A traditional family-introduction preamble (e.g. Burmese parents/siblings text) rendered as its own section right after the hero header, before the Greeting section. Example: `kyaw_hnin`.
+- **`dressCode`** — `{ show: boolean; colors: string[]; note?: LocalizedString }`. A wedding color palette shown as circular swatches (with hex labels) so guests know what to wear, rendered between the Schedule and Access sections. `colors` is a plain array of hex codes (e.g. `["#C5A059", "#4A4A4A"]`); `note` is an optional localized caption shown above the swatches. Only enable when the couple explicitly provides colors — most couples don't use this.
+
+If the user describes a new one-off "preamble" or "optional info block" idea for a couple, check here and in `types.ts` first — it's cheaper to extend one of these patterns (optional `show`-gated object) than invent a new one, and it keeps future automation from needing bespoke per-couple code.
+
 ## Photo Handling (download vs. hotlink)
 
 Don't just note the Drive link and stop — actually place the photos, using file size to decide how:
