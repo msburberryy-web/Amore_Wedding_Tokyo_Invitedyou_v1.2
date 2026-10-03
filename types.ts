@@ -54,6 +54,11 @@ export interface WeddingData {
     show: boolean;
     text: LocalizedString;
   };
+  dressCode?: { // Optional wedding color palette for guests to follow — not every couple uses this
+    show: boolean;
+    colors: string[]; // hex codes, e.g. ["#C5A059", "#4A4A4A"]
+    note?: LocalizedString; // optional caption shown above the swatches
+  };
   googleFormUrl: string;
   googleScriptUrl: string; 
   showSchedule: boolean; 

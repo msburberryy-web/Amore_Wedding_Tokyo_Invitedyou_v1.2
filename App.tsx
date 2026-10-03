@@ -28,6 +28,7 @@ const TRANSLATIONS = {
     days: "Days", hours: "Hours", mins: "Mins", secs: "Secs",
     schedule: "Plan",
     access: "Access",
+    dressCode: "Dress Code",
     faq: "FAQ",
     gallery: "Gallery",
     rsvp: "RSVP",
@@ -48,6 +49,7 @@ const TRANSLATIONS = {
     days: "日", hours: "時間", mins: "分", secs: "秒",
     schedule: "進行",
     access: "アクセス",
+    dressCode: "ドレスコード",
     faq: "Q&A",
     gallery: "写真",
     rsvp: "出欠",
@@ -68,6 +70,7 @@ const TRANSLATIONS = {
     days: "ရက်", hours: "နာရီ", mins: "မိနစ်", secs: "စက္ကန့်",
     schedule: "အစီအစဉ်",
     access: "တည်နေရာ",
+    dressCode: "ဝတ်စားဆင်ယင်မှု အရောင်",
     faq: "မေးခွန်းများ",
     gallery: "အမှတ်တရများ",
     rsvp: "အကြောင်းပြန်ရန်",
@@ -637,6 +640,26 @@ const App: React.FC = () => {
                       <div className="absolute -left-[45px] md:left-1/2 md:-ml-[5px] w-[10px] h-[10px] bg-wedding-gold rounded-full z-10 ring-4 ring-white" />
                       <div className="md:w-[45%] md:text-right mb-2 md:mb-0 md:pr-12"><span className="text-3xl font-serif text-wedding-text font-light">{item.time}</span></div>
                       <div className="md:w-[45%] md:pl-12"><h3 className="text-lg text-gray-700 font-medium tracking-wide">{item.title[lang]}</h3></div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {data.dressCode?.show && data.dressCode.colors && data.dressCode.colors.length > 0 && (
+              <section className="mb-24 px-6 md:px-12 text-center">
+                <div className="text-center mb-10">
+                  <h2 className="text-3xl font-serif text-wedding-text">{t.dressCode}</h2>
+                  <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
+                </div>
+                {data.dressCode.note?.[lang] && (
+                  <p className="text-gray-500 font-light mb-8 max-w-xl mx-auto">{data.dressCode.note[lang]}</p>
+                )}
+                <div className="flex justify-center flex-wrap gap-5">
+                  {data.dressCode.colors.map((hex, idx) => (
+                    <div key={idx} className="flex flex-col items-center gap-2">
+                      <div className="w-14 h-14 rounded-full shadow-sm border border-black/5" style={{ backgroundColor: hex }} />
+                      <span className="text-[10px] uppercase tracking-widest text-gray-400">{hex}</span>
                     </div>
                   ))}
                 </div>
