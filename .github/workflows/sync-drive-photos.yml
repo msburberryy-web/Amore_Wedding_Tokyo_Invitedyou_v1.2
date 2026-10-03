@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install image resizing dependency
+        run: npm install sharp --no-save
+
       - name: Download photos from Drive
         env:
           GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
