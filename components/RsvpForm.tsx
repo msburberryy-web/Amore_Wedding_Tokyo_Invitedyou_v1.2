@@ -149,7 +149,11 @@ END:VCALENDAR`;
     const payload = {
       ...formData,
       full_name: `${formData.honorific}. ${formData.name}`,
-      guest_info: formData.guests === 2 ? `${formData.guestHonorific}. ${formData.guestName}` : ''
+      guest_info: formData.guests === 2 ? `${formData.guestHonorific}. ${formData.guestName}` : '',
+      // Included so Apps Script can build confirmation emails without hardcoding
+      // couple names per deployment - sourced from the invitation's own data.
+      groom_name: weddingData?.groomName.en || '',
+      bride_name: weddingData?.brideName.en || ''
     };
 
     if (!googleScriptUrl) {
