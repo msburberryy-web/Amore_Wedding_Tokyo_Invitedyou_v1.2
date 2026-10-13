@@ -61,7 +61,12 @@ function notionRequest(p, method = 'GET', body = null) {
     }, res => {
       let d = '';
       res.on('data', c => d += c);
-      res.on('end', () => { try { resolve(JSON.parse(d)); } catch { resolve({}); } });
+      res.on('end', () => {
+        let json;
+        try { json = JSON.parse(d); } catch { reject(new Error(`Notion non-JSON response: ${d.slice(0, 200)}`)); return; }
+        if (json.object === 'error') reject(new Error(`Notion API error ${json.status}: ${json.message}`));
+        else resolve(json);
+      });
     });
     req.on('error', reject);
     if (body) req.write(JSON.stringify(body));
@@ -122,7 +127,7 @@ async function main() {
     await notionRequest('/v1/pages', 'POST', {
       parent: { database_id: DB_ID },
       properties: {
-        Name:   { title: [{ type: 'text', text: { content: `Web invitation — ${groomName} & ${brideName}` } }] },
+        Title:  { title: [{ type: 'text', text: { content: `Web invitation — ${groomName} & ${brideName}` } }] },
         Status: { select: { name: 'Done' } },
         Note:   { rich_text: [{ type: 'text', text: { content: noteContent } }] },
       },
