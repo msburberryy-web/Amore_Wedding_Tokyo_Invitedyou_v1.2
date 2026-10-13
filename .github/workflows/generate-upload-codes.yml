@@ -1,0 +1,40 @@
+name: Generate Upload Codes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate upload codes for all couples
+        env:
+          UPLOAD_SECRET: ${{ secrets.UPLOAD_SECRET }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: |
+          node -e "
+            const crypto = require('crypto');
+            const fs = require('fs');
+            const path = require('path');
+            const secret = process.env.UPLOAD_SECRET || '';
+            const base = (process.env.SITE_BASE_URL || '').replace(/\/\$/, '');
+            if (!secret) { console.log('ERROR: UPLOAD_SECRET not set'); process.exit(1); }
+            const publicDir = path.join(process.cwd(), 'public');
+            const files = fs.readdirSync(publicDir)
+              .filter(f => f.startsWith('wedding-data_') && f.endsWith('.json')).sort();
+            console.log('==================== UPLOAD CODES ====================');
+            for (const file of files) {
+              const folder = file.replace('wedding-data_', '').replace('.json', '');
+              const data = JSON.parse(fs.readFileSync(path.join(publicDir, file), 'utf8'));
+              const [g, b] = folder.split('_');
+              const eventSlug = g + '.' + b;
+              const code = crypto.createHmac('sha256', secret).update(folder).digest('hex').slice(0, 8);
+              const uploadUrl = base ? base + '/?mode=upload&event=' + eventSlug : '(set SITE_BASE_URL var)';
+              console.log('--- ' + data.groomName?.en + ' & ' + data.brideName?.en + ' ---');
+              console.log('  Upload URL  : ' + uploadUrl);
+              console.log('  Upload Code : ' + code);
+              console.log('');
+            }
+          "
