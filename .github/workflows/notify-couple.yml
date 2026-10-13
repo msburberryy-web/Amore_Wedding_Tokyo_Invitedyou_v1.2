@@ -1,0 +1,22 @@
+name: Post Upload Code to Notion
+
+on:
+  workflow_dispatch:
+    inputs:
+      folder:
+        description: 'Event folder name (e.g. morris_sein)'
+        required: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post upload code to Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+          UPLOAD_SECRET: ${{ secrets.UPLOAD_SECRET }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: node .github/scripts/post-upload-code.js "${{ inputs.folder }}"
