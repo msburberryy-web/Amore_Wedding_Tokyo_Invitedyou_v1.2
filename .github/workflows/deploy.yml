@@ -58,3 +58,31 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout (with history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Post upload codes to Notion for new couples
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+          UPLOAD_SECRET: ${{ secrets.UPLOAD_SECRET }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: |
+          NEW_FILES=$(git diff HEAD~1 HEAD --name-only --diff-filter=A -- 'public/wedding-data_*.json' 2>/dev/null || true)
+          if [ -z "$NEW_FILES" ]; then
+            echo "No new wedding-data JSON files in this push — skipping Notion notify."
+            exit 0
+          fi
+          echo "$NEW_FILES" | while read -r f; do
+            folder=$(echo "$f" | sed 's|public/wedding-data_||;s|\.json||')
+            echo "Notifying Notion for: $folder"
+            node .github/scripts/post-upload-code.js "$folder"
+          done
