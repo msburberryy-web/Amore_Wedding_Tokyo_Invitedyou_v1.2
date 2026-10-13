@@ -148,11 +148,11 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/zin_yin/gallery1.jpg",
-    "./photos/zin_yin/gallery2.jpg",
-    "./photos/zin_yin/gallery3.jpg",
-    "./photos/zin_yin/gallery4.jpg",
-    "./photos/zin_yin/gallery5.jpg"
+    "./photos/[event-folder]/gallery1.jpg",
+    "./photos/[event-folder]/gallery2.jpg",
+    "./photos/[event-folder]/gallery3.jpg",
+    "./photos/[event-folder]/gallery4.jpg",
+    "./photos/[event-folder]/gallery5.jpg"
   ],
   "musicUrl": "",
   "images": {

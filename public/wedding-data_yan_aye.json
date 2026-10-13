@@ -155,11 +155,11 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/yan_aye/gallery1.jpg",
-    "./photos/yan_aye/gallery2.jpg",
-    "./photos/yan_aye/gallery3.jpg",
-    "./photos/yan_aye/gallery4.jpg",
-    "./photos/yan_aye/gallery5.jpg"
+    "./photos/[event-folder]/gallery1.jpg",
+    "./photos/[event-folder]/gallery2.jpg",
+    "./photos/[event-folder]/gallery3.jpg",
+    "./photos/[event-folder]/gallery4.jpg",
+    "./photos/[event-folder]/gallery5.jpg"
   ],
   "musicUrl": "",
   "images": {

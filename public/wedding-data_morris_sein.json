@@ -148,11 +148,14 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/morris_sein/gallery1.jpg",
-    "./photos/morris_sein/gallery2.jpg",
-    "./photos/morris_sein/gallery3.jpg",
-    "./photos/morris_sein/gallery4.jpg",
-    "./photos/morris_sein/gallery5.jpg"
+    "./photos/[event-folder]/gallery1.jpg",
+    "./photos/[event-folder]/gallery2.jpg",
+    "./photos/[event-folder]/gallery3.jpg",
+    "./photos/[event-folder]/gallery4.jpg",
+    "./photos/[event-folder]/gallery5.jpg",
+    "./photos/[event-folder]/gallery6.jpg",
+    "./photos/[event-folder]/gallery7.jpg",
+    "./photos/[event-folder]/gallery8.jpg"
   ],
   "musicUrl": "",
   "images": {
