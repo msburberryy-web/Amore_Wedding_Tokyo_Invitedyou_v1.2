@@ -157,11 +157,16 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/[event-folder]/gallery1.jpg",
-    "./photos/[event-folder]/gallery2.jpg",
-    "./photos/[event-folder]/gallery3.jpg",
-    "./photos/[event-folder]/gallery4.jpg",
-    "./photos/[event-folder]/gallery5.jpg"
+    "./photos/paing_ei/gallery1.jpg",
+    "./photos/paing_ei/gallery2.jpg",
+    "./photos/paing_ei/gallery3.jpg",
+    "./photos/paing_ei/gallery4.jpg",
+    "./photos/paing_ei/gallery5.jpg",
+    "./photos/paing_ei/gallery6.jpg",
+    "./photos/paing_ei/gallery7.jpg",
+    "./photos/paing_ei/gallery8.jpg",
+    "./photos/paing_ei/gallery9.jpg",
+    "./photos/paing_ei/gallery10.jpg"
   ],
   "musicUrl": "",
   "images": {
