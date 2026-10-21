@@ -10,6 +10,9 @@ type AnimationStage = 'closed' | 'opening' | 'extracting' | 'zooming' | 'reveali
 
 const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const [stage, setStage] = useState<AnimationStage>('closed');
+  // Opt-in painterly variant: deep blue envelope + gold monogram/seal instead of the default cream paper.
+  const hasArt = !!data.images?.pageBackground;
+  const initials = `${(data.groomName?.en || '?').trim().charAt(0)}${(data.brideName?.en || '?').trim().charAt(0)}`.toUpperCase();
 
   const playPaperSound = () => {
       const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); 
@@ -58,48 +61,63 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
     >
       <div className="relative w-full max-w-lg perspective-1000">
          <div className={`relative w-full aspect-[1.5] transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="absolute inset-0 bg-[#f3f0e9] rounded-sm shadow-2xl overflow-hidden border border-[#e6e2d8] z-0">
-                <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
+            <div className={`absolute inset-0 rounded-sm shadow-2xl overflow-hidden z-0 ${hasArt ? 'border border-wedding-gold/40' : 'border border-[#e6e2d8]'}`} style={hasArt ? { backgroundColor: '#1F2D52' } : { backgroundColor: '#f3f0e9' }}>
+                {hasArt ? (
+                  <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,214,140,0.25), transparent 40%), radial-gradient(circle at 80% 75%, rgba(255,214,140,0.18), transparent 38%)' }}></div>
+                ) : (
+                  <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
+                )}
             </div>
             <div className="absolute inset-0 z-20 pointer-events-none filter drop-shadow-md">
                 <svg viewBox="0 0 300 200" className="w-full h-full" preserveAspectRatio="none">
-                    <path d="M0,0 L140,110 L0,200 Z" fill="#e6e2d8" />
-                    <path d="M300,0 L160,110 L300,200 Z" fill="#e6e2d8" />
-                    <path d="M0,200 L150,90 L300,200 Z" fill="#ece8df" />
-                    <path d="M0,200 L150,90 L300,200" fill="none" stroke="#dcd8cc" strokeWidth="1" />
+                    <path d="M0,0 L140,110 L0,200 Z" fill={hasArt ? '#28396B' : '#e6e2d8'} />
+                    <path d="M300,0 L160,110 L300,200 Z" fill={hasArt ? '#28396B' : '#e6e2d8'} />
+                    <path d="M0,200 L150,90 L300,200 Z" fill={hasArt ? '#223160' : '#ece8df'} />
+                    <path d="M0,200 L150,90 L300,200" fill="none" stroke={hasArt ? '#D1A054' : '#dcd8cc'} strokeWidth="1" strokeOpacity={hasArt ? 0.4 : 1} />
                 </svg>
             </div>
+            {hasArt && (
+              <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center" style={{ paddingBottom: '22%' }}>
+                <span className="font-script text-4xl text-wedding-gold/80">{initials.split('').join(' | ')}</span>
+              </div>
+            )}
             <div 
                 className="absolute top-0 left-0 right-0 h-1/2 origin-top transition-transform duration-[800ms] ease-in-out"
                 style={{ zIndex: flapZIndex, transformStyle: 'preserve-3d', transform: isOpeningOrLater ? 'rotateX(180deg)' : 'rotateX(0deg)' }}
             >
                  <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                     <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none"><path d="M0,0 L150,110 L300,0 Z" fill="#dcd8cc" /></svg>
+                     <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none"><path d="M0,0 L150,110 L300,0 Z" fill={hasArt ? '#1C2850' : '#dcd8cc'} /></svg>
                      <div className={`absolute top-[90%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
                         <div className="relative group cursor-pointer animate-pulse">
-                            <div className="w-16 h-16 bg-[#8a1c1c] rounded-full border-4 border-[#701515] shadow-lg flex items-center justify-center">
-                                <span className="text-white/90 font-serif italic font-bold text-sm">Open</span>
-                            </div>
+                            {hasArt ? (
+                              <div className="w-16 h-16 bg-[#D1A054] rounded-full border-4 border-[#8a6d2f] shadow-lg flex items-center justify-center">
+                                  <span className="text-[#1F2D52] font-serif italic font-bold text-sm">Open</span>
+                              </div>
+                            ) : (
+                              <div className="w-16 h-16 bg-[#8a1c1c] rounded-full border-4 border-[#701515] shadow-lg flex items-center justify-center">
+                                  <span className="text-white/90 font-serif italic font-bold text-sm">Open</span>
+                              </div>
+                            )}
                         </div>
                      </div>
                  </div>
-                 <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: '#f3f0e9', clipPath: 'polygon(0 0, 50% 100%, 100% 0)' }}>
+                 <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: hasArt ? '#1F2D52' : '#f3f0e9', clipPath: 'polygon(0 0, 50% 100%, 100% 0)' }}>
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
                  </div>
             </div>
          </div>
 
-         <div 
-            className={`bg-[#FDFBF7] shadow-lg rounded flex flex-col items-center justify-center text-center z-10 transition-all duration-[1000ms] cubic-bezier(0.4, 0, 0.2, 1) ${isZoomingOrLater ? 'fixed inset-0 w-screen h-screen z-[1000] scale-100 rounded-none' : 'absolute left-4 right-4 top-4 bottom-4'}`}
+         <div
+            className={`shadow-lg rounded flex flex-col items-center justify-center text-center z-10 transition-all duration-[1000ms] cubic-bezier(0.4, 0, 0.2, 1) ${hasArt ? 'bg-[#1F2D52]' : 'bg-[#FDFBF7]'} ${isZoomingOrLater ? 'fixed inset-0 w-screen h-screen z-[1000] scale-100 rounded-none' : 'absolute left-4 right-4 top-4 bottom-4'}`}
             style={{ transform: !isZoomingOrLater && isExtractingOrLater ? 'translateY(-60%)' : 'translateY(0)', zIndex: isZoomingOrLater ? 100 : 10 }}
          >
             <div className={`w-full h-full flex flex-col items-center justify-center border border-wedding-gold/30 p-4 md:p-8 transition-opacity duration-500 ${isRevealing ? 'opacity-0' : 'opacity-100'}`}>
                 <p className="text-wedding-gold text-[10px] md:text-xs tracking-[0.4em] uppercase mb-6 md:mb-8">Invitation</p>
-                <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-gray-800 mb-3 md:mb-4 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2">{data.groomName.en}</h2>
+                <h2 className={`font-serif text-xl sm:text-2xl md:text-3xl mb-3 md:mb-4 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 ${hasArt ? 'text-[#F6EFE1]' : 'text-gray-800'}`}>{data.groomName.en}</h2>
                 <span className="text-base md:text-lg text-wedding-gold font-script italic mb-3 md:mb-4">&</span>
-                <h2 className="font-serif text-xl sm:text-2xl md:text-3xl text-gray-800 mb-6 md:mb-8 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2">{data.brideName.en}</h2>
+                <h2 className={`font-serif text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 ${hasArt ? 'text-[#F6EFE1]' : 'text-gray-800'}`}>{data.brideName.en}</h2>
                 <div className="w-12 h-[1px] bg-wedding-gold mb-4"></div>
-                <p className="text-[10px] md:text-xs text-gray-500 font-serif uppercase tracking-widest">{new Date(data.date).toLocaleDateString()}</p>
+                <p className={`text-[10px] md:text-xs font-serif uppercase tracking-widest ${hasArt ? 'text-[#D1A054]/80' : 'text-gray-500'}`}>{new Date(data.date).toLocaleDateString()}</p>
             </div>
          </div>
       </div>
