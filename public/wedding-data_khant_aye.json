@@ -11,7 +11,7 @@
   },
   "date": "2026-12-05",
   "showCountdown": true,
-  "rsvpDeadline": "2026-10-21",
+  "rsvpDeadline": "2026-11-07",
   "location": {
     "name": {
       "en": "BATUR TOKYO",
@@ -158,7 +158,8 @@
   "images": {
     "hero": "./photos/khant_aye/cover.jpg",
     "groom": "./photos/khant_aye/groom.jpg",
-    "bride": "./photos/khant_aye/bride.jpg"
+    "bride": "./photos/khant_aye/bride.jpg",
+    "pageBackground": "./photos/khant_aye/page-bg.jpg"
   },
   "theme": {
     "primary": "#D1A054",

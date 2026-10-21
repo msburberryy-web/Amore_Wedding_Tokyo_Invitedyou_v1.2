@@ -71,6 +71,7 @@ export interface WeddingData {
     hero: string;
     groom: string;
     bride: string;
+    pageBackground?: string; // optional: shows behind the whole invitation page instead of flat white
   };
   theme: ThemeColors;
   fonts: FontConfig;
