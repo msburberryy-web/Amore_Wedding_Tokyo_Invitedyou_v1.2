@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 interface Props {
   targetDate: string;
   labels: { days: string; hours: string; mins: string; secs: string };
+  textClassName?: string; // overrides the default text-wedding-text color on the root
 }
 
-const Countdown: React.FC<Props> = ({ targetDate, labels }) => {
+const Countdown: React.FC<Props> = ({ targetDate, labels, textClassName }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -36,7 +37,7 @@ const Countdown: React.FC<Props> = ({ targetDate, labels }) => {
   }, [targetDate]);
 
   return (
-    <div className="flex justify-center gap-4 md:gap-8 my-8 text-wedding-text">
+    <div className={`flex justify-center gap-4 md:gap-8 my-8 ${textClassName || 'text-wedding-text'}`}>
       {[
         { val: timeLeft.days, label: labels.days },
         { val: timeLeft.hours, label: labels.hours },
