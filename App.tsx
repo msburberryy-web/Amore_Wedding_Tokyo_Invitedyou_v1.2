@@ -127,7 +127,8 @@ const replacePhotoPathsWithEventFolder = (data: WeddingData, eventParam: string 
     images: {
       hero: replacePhotoPaths(data.images?.hero || ''),
       groom: replacePhotoPaths(data.images?.groom || ''),
-      bride: replacePhotoPaths(data.images?.bride || '')
+      bride: replacePhotoPaths(data.images?.bride || ''),
+      pageBackground: data.images?.pageBackground ? replacePhotoPaths(data.images.pageBackground) : undefined
     },
     gallery: (data.gallery || []).map(img => replacePhotoPaths(img))
   };
@@ -465,6 +466,7 @@ const App: React.FC = () => {
 
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
+  const pageBgImage = data.images?.pageBackground ? cacheBustedAsset(data.images.pageBackground) : '';
   const styleVars = {
     '--color-primary': hexToRgb(theme.primary),
     '--color-text': hexToRgb(theme.text),
@@ -568,7 +570,15 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          <main className="max-w-4xl mx-auto bg-white relative z-20 shadow-2xl pb-12">
+          <main
+            className={`max-w-4xl mx-auto relative z-20 shadow-2xl pb-12 ${pageBgImage ? '' : 'bg-white'}`}
+            style={pageBgImage ? {
+              backgroundImage: `linear-gradient(rgba(255,255,255,0.87), rgba(255,255,255,0.87)), url(${pageBgImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'top center',
+              backgroundRepeat: 'no-repeat',
+            } : undefined}
+          >
 
             {/* Family Introduction Section (optional, per-couple traditional preamble) */}
             {data.familyIntro?.show && data.familyIntro.text[lang] && (
