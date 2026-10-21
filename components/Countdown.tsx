@@ -4,9 +4,10 @@ interface Props {
   targetDate: string;
   labels: { days: string; hours: string; mins: string; secs: string };
   textClassName?: string; // overrides the default text-wedding-text color on the root
+  badgeStyle?: boolean; // wraps each digit in a circular navy/gold badge instead of plain stacked text
 }
 
-const Countdown: React.FC<Props> = ({ targetDate, labels, textClassName }) => {
+const Countdown: React.FC<Props> = ({ targetDate, labels, textClassName, badgeStyle }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -45,7 +46,13 @@ const Countdown: React.FC<Props> = ({ targetDate, labels, textClassName }) => {
         { val: timeLeft.seconds, label: labels.secs },
       ].map((item, idx) => (
         <div key={idx} className="flex flex-col items-center">
-          <span className="text-2xl md:text-4xl font-serif font-light">{String(item.val).padStart(2, '0')}</span>
+          {badgeStyle ? (
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#1b2742]/80 border-2 border-wedding-gold/60 flex items-center justify-center shadow-lg">
+              <span className="text-lg md:text-2xl font-serif font-light">{String(item.val).padStart(2, '0')}</span>
+            </div>
+          ) : (
+            <span className="text-2xl md:text-4xl font-serif font-light">{String(item.val).padStart(2, '0')}</span>
+          )}
           <span className="text-xs uppercase tracking-widest opacity-60 mt-1">{item.label}</span>
         </div>
       ))}

@@ -474,6 +474,11 @@ const App: React.FC = () => {
     backgroundImage: 'radial-gradient(circle at 18% 25%, rgba(255,214,140,0.18), transparent 42%), radial-gradient(circle at 82% 70%, rgba(255,214,140,0.14), transparent 38%), radial-gradient(circle at 55% 12%, rgba(255,214,140,0.10), transparent 30%)',
   } : undefined;
   const nightBandTextClass = pageBgImage ? 'text-[#F6EFE1]' : 'text-wedding-text';
+  // Opt-in "parchment card" treatment: a floating paper-colored card instead of a full-bleed
+  // flat section, so section content stays fully legible sitting on top of the now-visible painting.
+  const cardClass = pageBgImage
+    ? 'bg-[#f8f4ea] rounded-2xl shadow-xl border border-[#e6ddc8] mx-4 md:mx-10'
+    : '';
   const styleVars = {
     '--color-primary': hexToRgb(theme.primary),
     '--color-text': hexToRgb(theme.text),
@@ -580,7 +585,10 @@ const App: React.FC = () => {
           <main
             className={`max-w-4xl mx-auto relative z-20 shadow-2xl pb-12 ${pageBgImage ? '' : 'bg-white'}`}
             style={pageBgImage ? {
-              backgroundImage: `linear-gradient(rgba(255,255,255,0.87), rgba(255,255,255,0.87)), url(${pageBgImage})`,
+              // Painting shows fully through now — every content block below renders as its
+              // own floating parchment card (see cardClass), so nothing sits directly on the
+              // raw artwork except section headings/dividers, which are legible against it.
+              backgroundImage: `linear-gradient(rgba(10,14,28,0.18), rgba(10,14,28,0.18)), url(${pageBgImage})`,
               backgroundSize: 'cover',
               backgroundPosition: 'top center',
               backgroundRepeat: 'no-repeat',
@@ -589,13 +597,13 @@ const App: React.FC = () => {
 
             {/* Family Introduction Section (optional, per-couple traditional preamble) */}
             {data.familyIntro?.show && data.familyIntro.text[lang] && (
-              <section className="text-center pt-24 pb-4 px-8 md:px-12 bg-white">
+              <section className={`text-center pb-4 px-8 md:px-12 ${pageBgImage ? `pt-10 mt-8 mb-8 ${cardClass}` : 'pt-24 bg-white'}`}>
                 <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.familyIntro.text[lang]}</p>
               </section>
             )}
 
             {/* Greeting Section */}
-            <section className="text-center pt-24 pb-16 px-8 md:px-12 bg-white">
+            <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-8 mb-8 ${cardClass}` : 'pt-24 pb-16 bg-white'}`}>
               <div className="mb-12 flex flex-col items-center">
                   <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
                   <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>
@@ -639,26 +647,28 @@ const App: React.FC = () => {
             </section>
 
             {(data.showCountdown ?? true) && (
-              <section className={`py-16 mb-12 ${pageBgImage ? '' : 'bg-white border-b border-gray-100'}`} style={nightBandStyle}>
-                <div className="text-center mb-8"><span className="text-wedding-gold tracking-widest uppercase text-xs">Time until the big day</span></div>
-                <Countdown targetDate={data.date} labels={{ days: t.days, hours: t.hours, mins: t.mins, secs: t.secs }} textClassName={nightBandTextClass} />
+              <section className={`py-16 mb-12 ${pageBgImage ? '' : 'bg-white border-b border-gray-100'}`}>
+                <div className="text-center mb-8"><span className={`tracking-widest uppercase text-xs ${pageBgImage ? 'text-[#F6EFE1]' : 'text-wedding-gold'}`}>{pageBgImage ? 'Our Wedding Day' : 'Time until the big day'}</span></div>
+                <Countdown targetDate={data.date} labels={{ days: t.days, hours: t.hours, mins: t.mins, secs: t.secs }} textClassName={nightBandTextClass} badgeStyle={!!pageBgImage} />
               </section>
             )}
 
             {data.showSchedule && (
               <section ref={scheduleRef} className="mb-24 px-6 md:px-12">
-                <div className="text-center mb-16">
-                     <h2 className="text-3xl font-serif text-wedding-text">{t.schedule}</h2>
-                     <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
-                </div>
-                <div className="relative border-l border-wedding-gold/20 ml-6 md:ml-1/2 space-y-16 pl-10 md:pl-0">
-                  {data.schedule.map((item, idx) => (
-                    <div key={idx} className="relative md:flex items-center justify-between group">
-                      <div className="absolute -left-[45px] md:left-1/2 md:-ml-[5px] w-[10px] h-[10px] bg-wedding-gold rounded-full z-10 ring-4 ring-white" />
-                      <div className="md:w-[45%] md:text-right mb-2 md:mb-0 md:pr-12"><span className="text-3xl font-serif text-wedding-text font-light">{item.time}</span></div>
-                      <div className="md:w-[45%] md:pl-12"><h3 className="text-lg text-gray-700 font-medium tracking-wide">{item.title[lang]}</h3></div>
-                    </div>
-                  ))}
+                <div className={pageBgImage ? `${cardClass} p-8 md:p-12` : ''}>
+                  <div className="text-center mb-16">
+                       <h2 className="text-3xl font-serif text-wedding-text">{t.schedule}</h2>
+                       <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
+                  </div>
+                  <div className="relative border-l border-wedding-gold/20 ml-6 md:ml-1/2 space-y-16 pl-10 md:pl-0">
+                    {data.schedule.map((item, idx) => (
+                      <div key={idx} className="relative md:flex items-center justify-between group">
+                        <div className={`absolute -left-[45px] md:left-1/2 md:-ml-[5px] w-[10px] h-[10px] bg-wedding-gold rounded-full z-10 ring-4 ${pageBgImage ? 'ring-[#f8f4ea]' : 'ring-white'}`} />
+                        <div className="md:w-[45%] md:text-right mb-2 md:mb-0 md:pr-12"><span className="text-3xl font-serif text-wedding-text font-light">{item.time}</span></div>
+                        <div className="md:w-[45%] md:pl-12"><h3 className="text-lg text-gray-700 font-medium tracking-wide">{item.title[lang]}</h3></div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </section>
             )}
@@ -688,7 +698,7 @@ const App: React.FC = () => {
                      <h2 className="text-3xl font-serif text-wedding-text">{t.access}</h2>
                      <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                 </div>
-               <div className="bg-[#fcfbf9] p-8 md:p-12 rounded-sm border border-gray-100 text-center">
+               <div className={`p-8 md:p-12 text-center ${pageBgImage ? cardClass.replace('mx-4 md:mx-10', '') : 'bg-[#fcfbf9] rounded-sm border border-gray-100'}`}>
                     <h3 className="text-2xl font-serif font-bold mb-4 text-gray-800">{data.location.name[lang]}</h3>
                     <p className="text-gray-500 mb-8 font-light">{data.location.address[lang]}</p>
                     <div className="h-64 md:h-80 w-full bg-gray-200 mb-8 grayscale hover:grayscale-0 transition-all duration-700">
@@ -725,26 +735,28 @@ const App: React.FC = () => {
             )}
 
              {(data.faq && data.faq.length > 0) && (
-               <section className="mb-24 px-6 md:px-12 bg-[#faf9f6] py-20">
+               <section className={`mb-24 px-6 md:px-12 py-20 ${pageBgImage ? '' : 'bg-[#faf9f6]'}`}>
+                 <div className={pageBgImage ? `${cardClass} p-8 md:p-14` : ''}>
                  <div className="text-center mb-12">
                         <h2 className="text-3xl font-serif text-wedding-text">{t.faq}</h2>
                         <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                  </div>
                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-12 max-w-3xl mx-auto">
                   {processedFaq.map((item, idx) => (
-                     <div key={idx} className="border-b border-gray-200 pb-8">
-                        <h3 className="text-md font-bold text-gray-800 mb-4 flex items-start gap-3">
-                             <span className="text-wedding-gold text-sm font-serif italic">Q.</span>
+                     <div key={idx} className={`pb-8 ${pageBgImage ? 'border-b border-[#D1A054]/25' : 'border-b border-gray-200'}`}>
+                        <h3 className={`text-md font-bold mb-4 flex items-start gap-3 ${pageBgImage ? 'text-[#2A4B8D]' : 'text-gray-800'}`}>
+                             <span className={`text-sm font-serif italic ${pageBgImage ? 'text-[#D1A054]' : 'text-wedding-gold'}`}>Q.</span>
                              {item.question[lang]}
                         </h3>
-                        <p className="text-gray-500 font-light text-sm leading-relaxed pl-7">{item.answer[lang]}</p>
+                        <p className={`font-light text-sm leading-relaxed pl-7 ${pageBgImage ? 'text-[#8A6D3B]' : 'text-gray-500'}`}>{item.answer[lang]}</p>
                      </div>
                    ))}
+                 </div>
                  </div>
                </section>
              )}
 
-            <section className="text-center py-20 px-6">
+            <section className={`text-center py-20 px-6 ${pageBgImage ? `mb-8 ${cardClass}` : ''}`}>
               {isRsvpClosed ? (
                 <div className="inline-block px-10 py-6 border border-gray-200 rounded-2xl bg-gray-50">
                   <p className="font-serif text-xl text-gray-400">{t.rsvpClosed}</p>
@@ -767,7 +779,7 @@ const App: React.FC = () => {
             </section>
           </main>
 
-          <footer className="bg-[#f5f5f5] pt-16 pb-32 text-center text-gray-500">
+          <footer className={`pt-16 pb-32 text-center ${pageBgImage ? nightBandTextClass : 'bg-[#f5f5f5] text-gray-500'}`} style={pageBgImage ? nightBandStyle : undefined}>
             <div className="max-w-md mx-auto flex flex-col items-center">
               <p className="font-serif italic text-xl mb-4 text-wedding-gold">Amoré Wedding Tokyo</p>
               <p className="text-[10px] uppercase tracking-widest opacity-60">{t.presentedBy}</p>
