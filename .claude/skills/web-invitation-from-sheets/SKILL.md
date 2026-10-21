@@ -145,6 +145,25 @@ One more repo-specific detail worth knowing: this repo's `RsvpForm.tsx` fetches 
 8. Validate: `node -e "JSON.parse(...)"` the file, and run `npx tsc --noEmit` (and ideally `npm run build`) before committing — this has caught real issues before.
 9. Commit on a new branch, push, open a PR against `main` with a clear summary (including any flags — swapped schedule, uncertain repo, name discrepancy), and merge once confirmed or when explicitly told to proceed.
 
+## Weekly Batch Check (Routine)
+
+A weekly scheduled Routine ("Weekly 納品 invitation build check") runs this skill in batch mode — Monday 7:53 PM JST, resuming the session that created it. **Check `list_triggers` for an existing Routine covering this before creating a new one** — more than one has existed covering overlapping ground (a separate "web invitation create routine" also watches this same sheet on Thursdays); running two independently risks duplicate PRs or conflicting slugs for the same couple. Flag this to the user rather than silently adding a third.
+
+Batch mode differs from the single-couple workflow above in a few ways:
+
+1. **Selection is a filter over the whole sheet, not one named couple**: every row where 納品済 (column S) is blank AND 納品日 (column R) is today, within the next 7 days, or already overdue. Overdue rows are more urgent, not less — don't skip them.
+2. **Dedupe against the repo, not the sheet.** `ls public/wedding-data_*.json` first; skip any row that already has a matching file. The 納品済 column is not a reliable "already processed" signal since it's managed manually and nothing writes it automatically — the repo's file listing is ground truth for "already built."
+3. **Photo syncs run sequentially, never in parallel.** Triggering `sync-drive-photos.yml` for two couples back-to-back races on the git ref and the second push gets rejected. Wait for each run to reach `completed` before starting the next couple's sync.
+4. **Wait for the deploy, not just the merge**, before reporting a couple as done — poll the "Deploy to GitHub Pages" run (it's triggered by the sync commit via `workflow_run`, or directly by the merge if there were no photos) until `completed`/`success`.
+5. **Notify per couple, not batched at the end.** The instant a couple's deploy succeeds, call `PushNotification` (status `"proactive"`) naming that couple so the user can go set up their RSVP script right away. This only actually reaches the phone when Remote Control happens to be connected at that moment — call it regardless, but don't treat a "not sent" result as a failure. (A fresh-session Routine could carry a guaranteed push/email notification instead, but this org's Routine API rejects `connectors` on fresh-session Routines — meaning a fresh session could never read the intake sheet in the first place. Resuming the existing session, with best-effort `PushNotification`, is the only combination that actually works.)
+6. **Final report is a table**, one row per couple processed that run, with exactly these columns:
+   - **JSON deploy status** (merged + deployed successfully / merged but deploy pending or failed)
+   - **Image upload status** (synced N photos / no Drive link provided yet / sync failed)
+   - **Invitation URL** (`https://msburberryy-web.github.io/Amore_Wedding_Tokyo_Invitedyou_v1.2/?event={slug}`)
+   - **RSVP script to copy-paste** — the raw GitHub URL of `public/scripts/_template_rsvp_script_with_email.js` on `main` (same generic script for every couple; only `SHEET_ID` and the `from` address need per-couple edits — see **RSVP Google Sheet + Apps Script** above)
+7. If nothing is due, the entire output should be one line saying so — no table, no notification.
+8. Never touch `googleScriptUrl` or 納品済 in batch mode either — both stay human-managed, same as the single-couple workflow.
+
 ## Notes
 
 - Do not mark 納品済 in the spreadsheet — that column is managed manually by the team.
