@@ -467,6 +467,13 @@ const App: React.FC = () => {
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
   const pageBgImage = data.images?.pageBackground ? cacheBustedAsset(data.images.pageBackground) : '';
+  // Opt-in "night sky" treatment for the sections that would otherwise stay flat white/off-white
+  // even when a couple has a painterly pageBackground — deep indigo with a soft gold starlight glow.
+  const nightBandStyle: React.CSSProperties | undefined = pageBgImage ? {
+    backgroundColor: '#22325A',
+    backgroundImage: 'radial-gradient(circle at 18% 25%, rgba(255,214,140,0.18), transparent 42%), radial-gradient(circle at 82% 70%, rgba(255,214,140,0.14), transparent 38%), radial-gradient(circle at 55% 12%, rgba(255,214,140,0.10), transparent 30%)',
+  } : undefined;
+  const nightBandTextClass = pageBgImage ? 'text-[#F6EFE1]' : 'text-wedding-text';
   const styleVars = {
     '--color-primary': hexToRgb(theme.primary),
     '--color-text': hexToRgb(theme.text),
@@ -598,7 +605,7 @@ const App: React.FC = () => {
             </section>
 
              {/* Profile Section - Refined for Piary Look (Cleaner, no rotation on mobile) */}
-             <section className="py-20 px-6 overflow-hidden bg-[#faf9f6]">
+             <section className={`py-20 px-6 overflow-hidden ${pageBgImage ? '' : 'bg-[#faf9f6]'}`} style={nightBandStyle}>
                 <div className="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-24 relative max-w-5xl mx-auto">
                     
                     {/* Groom */}
@@ -609,7 +616,7 @@ const App: React.FC = () => {
                              </div>
                         </div>
                         <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.groomName[lang])} font-serif text-wedding-text`}>{data.groomName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.groomName[lang])} font-serif ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Groom</p>
                         </div>
                     </div>
@@ -624,7 +631,7 @@ const App: React.FC = () => {
                              </div>
                         </div>
                          <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.brideName[lang])} font-serif text-wedding-text`}>{data.brideName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.brideName[lang])} font-serif ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Bride</p>
                         </div>
                     </div>
@@ -632,9 +639,9 @@ const App: React.FC = () => {
             </section>
 
             {(data.showCountdown ?? true) && (
-              <section className="bg-white py-16 mb-12 border-b border-gray-100">
+              <section className={`py-16 mb-12 ${pageBgImage ? '' : 'bg-white border-b border-gray-100'}`} style={nightBandStyle}>
                 <div className="text-center mb-8"><span className="text-wedding-gold tracking-widest uppercase text-xs">Time until the big day</span></div>
-                <Countdown targetDate={data.date} labels={{ days: t.days, hours: t.hours, mins: t.mins, secs: t.secs }} />
+                <Countdown targetDate={data.date} labels={{ days: t.days, hours: t.hours, mins: t.mins, secs: t.secs }} textClassName={nightBandTextClass} />
               </section>
             )}
 
