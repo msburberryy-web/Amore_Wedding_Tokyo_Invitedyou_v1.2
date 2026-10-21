@@ -161,9 +161,9 @@
     "bride": "./photos/khant_aye/bride.jpg"
   },
   "theme": {
-    "primary": "#C5A059",
-    "text": "#4A4A4A",
-    "backgroundTint": "#F5F0E6"
+    "primary": "#D1A054",
+    "text": "#2E3A5C",
+    "backgroundTint": "#F6EFE1"
   },
   "fonts": {
     "en": "\"Cormorant Garamond\"",
