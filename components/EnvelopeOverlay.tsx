@@ -77,16 +77,19 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 </svg>
             </div>
             {hasArt && (
-              <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center" style={{ paddingBottom: '22%' }}>
-                <span className="font-script text-4xl text-wedding-gold/80">{initials.split('').join(' | ')}</span>
+              <div className="absolute inset-x-0 top-0 z-20 pointer-events-none flex items-start justify-center pt-5 md:pt-8">
+                <span className="font-script text-3xl md:text-4xl text-wedding-gold/90 tracking-wide">{initials.split('').join(' | ')}</span>
               </div>
             )}
-            <div 
-                className="absolute top-0 left-0 right-0 h-1/2 origin-top transition-transform duration-[800ms] ease-in-out"
+            <div
+                className="absolute top-0 left-0 right-0 h-[53%] origin-top transition-transform duration-[800ms] ease-in-out"
                 style={{ zIndex: flapZIndex, transformStyle: 'preserve-3d', transform: isOpeningOrLater ? 'rotateX(180deg)' : 'rotateX(0deg)' }}
             >
+                 {/* Oversized relative to its own viewBox and slightly wider than the body on purpose —
+                     guarantees full overlap with the body's side-triangle seams so no base color shows
+                     through the gap regardless of sub-pixel rounding. */}
                  <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                     <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none"><path d="M0,0 L150,110 L300,0 Z" fill={hasArt ? '#1C2850' : '#dcd8cc'} /></svg>
+                     <svg viewBox="0 0 300 100" className="w-full h-full overflow-visible" preserveAspectRatio="none"><path d="M-10,-5 L150,128 L310,-5 Z" fill={hasArt ? '#1C2850' : '#dcd8cc'} /></svg>
                      <div className={`absolute top-[90%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
                         <div className="relative group cursor-pointer animate-pulse">
                             {hasArt ? (

@@ -556,7 +556,7 @@ const App: React.FC = () => {
       ) : (
         <>
         <header className="relative h-screen min-h-[700px] flex items-center justify-center text-center overflow-hidden">
-            <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${cacheBustedAsset(data.images?.hero || DEFAULT_DATA.images.hero)})` }} />
+            <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${cacheBustedAsset(data.images?.hero || data.images?.pageBackground || DEFAULT_DATA.images.hero)})` }} />
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
@@ -603,7 +603,7 @@ const App: React.FC = () => {
             )}
 
             {/* Greeting Section */}
-            <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-8 mb-8 ${cardClass}` : 'pt-24 pb-16 bg-white'}`}>
+            <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-12 mb-8 ${cardClass} shadow-2xl` : 'pt-24 pb-16 bg-white'}`}>
               <div className="mb-12 flex flex-col items-center">
                   <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
                   <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>
@@ -736,7 +736,7 @@ const App: React.FC = () => {
 
              {(data.faq && data.faq.length > 0) && (
                <section className={`mb-24 px-6 md:px-12 py-20 ${pageBgImage ? '' : 'bg-[#faf9f6]'}`}>
-                 <div className={pageBgImage ? `${cardClass} p-8 md:p-14` : ''}>
+                 <div className={pageBgImage ? `bg-[#f8f4ea] rounded-2xl shadow-2xl border-2 border-wedding-gold mx-4 md:mx-10 p-8 md:p-14` : ''}>
                  <div className="text-center mb-12">
                         <h2 className="text-3xl font-serif text-wedding-text">{t.faq}</h2>
                         <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
@@ -756,24 +756,24 @@ const App: React.FC = () => {
                </section>
              )}
 
-            <section className={`text-center py-20 px-6 ${pageBgImage ? `mb-8 ${cardClass}` : ''}`}>
+            <section className={`text-center py-20 px-6 rounded-2xl ${pageBgImage ? 'mb-8 mx-4 md:mx-10 shadow-xl border border-wedding-gold/40' : ''}`} style={nightBandStyle}>
               {isRsvpClosed ? (
-                <div className="inline-block px-10 py-6 border border-gray-200 rounded-2xl bg-gray-50">
-                  <p className="font-serif text-xl text-gray-400">{t.rsvpClosed}</p>
-                  <p className="mt-3 text-gray-400 font-light text-sm">{t.rsvpClosedNote}</p>
+                <div className={`inline-block px-10 py-6 rounded-2xl ${pageBgImage ? 'border border-wedding-gold/30 bg-black/15' : 'border border-gray-200 bg-gray-50'}`}>
+                  <p className={`font-serif text-xl ${pageBgImage ? 'text-[#F6EFE1]' : 'text-gray-400'}`}>{t.rsvpClosed}</p>
+                  <p className={`mt-3 font-light text-sm ${pageBgImage ? 'text-[#F6EFE1]/70' : 'text-gray-400'}`}>{t.rsvpClosedNote}</p>
                 </div>
               ) : (
                 <>
                   {data.rsvpDeadline && (
-                    <div className="block w-fit mx-auto px-10 py-4 mb-8 rounded-2xl bg-wedding-gold/10 border border-wedding-gold/30">
+                    <div className={`block w-fit mx-auto px-10 py-4 mb-8 rounded-2xl border ${pageBgImage ? 'bg-wedding-gold/15 border-wedding-gold/40' : 'bg-wedding-gold/10 border-wedding-gold/30'}`}>
                       <p className="text-xs font-bold uppercase tracking-[0.2em] text-wedding-gold">{t.rsvpDeadlineLabel}</p>
-                      <p className="mt-1 font-serif text-xl text-wedding-text">{formatDeadline(data.rsvpDeadline)}</p>
+                      <p className={`mt-1 font-serif text-xl ${nightBandTextClass}`}>{formatDeadline(data.rsvpDeadline)}</p>
                     </div>
                   )}
                   <div className="border border-wedding-gold p-1 inline-block rounded-full">
                     <button onClick={() => setView('rsvp')} className="w-full md:w-auto px-16 py-4 bg-wedding-gold text-white font-serif text-xl tracking-widest uppercase hover:bg-wedding-text transition-colors rounded-full shadow-lg">{t.rsvp}</button>
                   </div>
-                  <p className="mt-6 text-gray-400 font-light text-sm">{t.rsvpNote}</p>
+                  <p className={`mt-6 font-light text-sm ${pageBgImage ? 'text-[#F6EFE1]/70' : 'text-gray-400'}`}>{t.rsvpNote}</p>
                 </>
               )}
             </section>
