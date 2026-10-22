@@ -77,7 +77,7 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 </svg>
             </div>
             {hasArt && (
-              <div className="absolute inset-x-0 top-0 z-20 pointer-events-none flex items-start justify-center pt-5 md:pt-8">
+              <div className="absolute inset-x-0 z-20 pointer-events-none flex justify-center" style={{ top: '64%', transform: 'translateY(-50%)' }}>
                 <span className="font-script text-3xl md:text-4xl text-wedding-gold/90 tracking-wide">{initials.split('').join(' | ')}</span>
               </div>
             )}
