@@ -8,6 +8,14 @@ interface Props {
 
 type AnimationStage = 'closed' | 'opening' | 'extracting' | 'zooming' | 'revealing' | 'finished';
 
+// Timing for the hasArt (khant_aye) 4-flap variant only — slowed down from the original ~1.2s/900ms
+// so the opening reads as deliberate rather than snappy, and the fade-to-real-page below is tuned to
+// finish a bit before the flaps would have visually completed their rotation.
+const ART_FLAP_DURATION_MS = 1600;
+const ART_FADE_DELAY_MS = 600; // backdrop + flaps stay fully closed/opaque for this long before fading
+const ART_FADE_DURATION_MS = 900; // then fade to fully transparent over this long
+const ART_REVEAL_MS = ART_FADE_DELAY_MS + ART_FADE_DURATION_MS + 50; // unmount shortly after the fade finishes, while flaps are still mid-rotation
+
 const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const [stage, setStage] = useState<AnimationStage>('closed');
   const [sealPressed, setSealPressed] = useState(false);
@@ -27,14 +35,16 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
     setStage('opening');
     document.body.style.overflow = '';
     if (hasArt) {
-      // No paper/card stage for this variant — once the 4 flaps have folded away (~1.2s, see the
-      // staggered delays below), go straight to revealing the actual website underneath instead of
-      // showing an intermediate "Invitation" card first.
+      // No paper/card stage for this variant. The flap rotation itself takes ~2.1s to fully
+      // complete (slowed down from the previous ~1.2s), but the backdrop + flap-group fade to
+      // transparent over ART_FADE_DELAY..ART_FADE_DELAY+ART_FADE_DURATION (see render below) — by
+      // ART_REVEAL_MS the fade is already finished, so the real website is already visible through
+      // the (by then invisible) flaps well before their rotation would have visually finished.
       setTimeout(() => {
         setStage('revealing');
         onOpen();
-      }, 1300);
-      setTimeout(() => setStage('finished'), 2350);
+      }, ART_REVEAL_MS);
+      setTimeout(() => setStage('finished'), ART_REVEAL_MS + 1050);
     } else {
       setTimeout(() => setStage('extracting'), 400);
       setTimeout(() => setStage('zooming'), 1400);
@@ -72,10 +82,27 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   // symmetric X/cross.
   const ART_MEET_Y = 58;
 
+  // The hasArt backdrop fades on its own elapsed-time schedule (ART_FADE_DELAY_MS..+ART_FADE_DURATION_MS,
+  // started the instant opening begins) rather than on the isRevealing stage flag — isRevealing only
+  // flips at ART_REVEAL_MS, at which point the parent (App.tsx) unmounts this component immediately, far
+  // too fast for a CSS transition keyed off it to ever actually play. Keying the fade off elapsed time
+  // instead lets it visibly run while the component is still mounted, finishing just before that unmount.
+  const outerClassName = hasArt
+    ? 'fixed inset-0 z-[100] flex items-center justify-center p-0 bg-stone-900/90 backdrop-blur-sm'
+    : `fixed inset-0 z-[100] flex items-center justify-center transition-all duration-1000 ease-in-out p-4 ${isRevealing ? 'opacity-0 pointer-events-none' : 'opacity-100 bg-stone-900/90 backdrop-blur-sm'}`;
+  const outerStyle: React.CSSProperties = hasArt
+    ? {
+        touchAction: 'none',
+        opacity: isOpeningOrLater ? 0 : 1,
+        pointerEvents: isOpeningOrLater ? 'none' : 'auto',
+        transition: `opacity ${ART_FADE_DURATION_MS}ms ease-in-out ${ART_FADE_DELAY_MS}ms`,
+      }
+    : { touchAction: 'none' };
+
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-1000 ease-in-out ${isRevealing ? 'opacity-0 pointer-events-none' : 'opacity-100 bg-stone-900/90 backdrop-blur-sm'} ${hasArt ? 'p-0' : 'p-4'}`}
-      style={{ touchAction: 'none' }}
+      className={outerClassName}
+      style={outerStyle}
       onClick={startSequence}
     >
       <div className={hasArt ? 'relative w-full h-full' : 'relative w-full max-w-lg perspective-1000'} style={hasArt ? { perspective: '1600px' } : undefined}>
@@ -91,7 +118,10 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
           // `transform`), trapping the flaps' z-index inside it and letting the reveal-card sibling
           // (explicit z-index: 10, in the outer context) paint over the whole thing regardless of
           // the flaps' z-index: 30 — that was the actual bug behind "I don't see the envelope at all".
-          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
+          <div
+            className="absolute inset-0"
+            style={{ opacity: isOpeningOrLater ? 0 : 1, transition: `opacity ${ART_FADE_DURATION_MS}ms ease-in-out ${ART_FADE_DELAY_MS}ms` }}
+          >
             <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }} />
             {([
               {
@@ -99,32 +129,38 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 fold: 'linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(0,0,0,0.05) 55%, rgba(0,0,0,0.32))',
               },
               {
-                clip: `polygon(0 100%, 100% 100%, 50% ${ART_MEET_Y}%)`, origin: 'bottom center', openT: 'rotateX(175deg)', delay: '300ms',
+                clip: `polygon(0 100%, 100% 100%, 50% ${ART_MEET_Y}%)`, origin: 'bottom center', openT: 'rotateX(175deg)', delay: '500ms',
                 fold: 'linear-gradient(to top, rgba(0,0,0,0.04), rgba(0,0,0,0.30))',
               },
               {
-                clip: `polygon(0 0, 50% ${ART_MEET_Y}%, 0 100%)`, origin: 'left center', openT: 'rotateY(175deg)', delay: '120ms',
+                clip: `polygon(0 0, 50% ${ART_MEET_Y}%, 0 100%)`, origin: 'left center', openT: 'rotateY(175deg)', delay: '200ms',
                 fold: 'linear-gradient(to right, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
               },
               {
-                clip: `polygon(100% 0, 50% ${ART_MEET_Y}%, 100% 100%)`, origin: 'right center', openT: 'rotateY(-175deg)', delay: '120ms',
+                clip: `polygon(100% 0, 50% ${ART_MEET_Y}%, 100% 100%)`, origin: 'right center', openT: 'rotateY(-175deg)', delay: '200ms',
                 fold: 'linear-gradient(to left, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
               },
             ] as const).map((flap, i) => (
               <div
                 key={i}
-                className="absolute inset-0 transition-transform duration-[900ms]"
+                className="absolute inset-0 transition-transform"
                 style={{
                   zIndex: artFlapZIndex,
                   clipPath: flap.clip,
                   transformOrigin: flap.origin,
                   transformStyle: 'preserve-3d',
                   backfaceVisibility: 'hidden',
+                  transitionDuration: `${ART_FLAP_DURATION_MS}ms`,
                   transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
                   transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
                   transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
                   backgroundColor: '#1F2D52',
                   backgroundImage: `${flap.fold}, radial-gradient(circle at 30% 20%, rgba(255,214,140,0.08), transparent 35%)`,
+                  // Soft shadow along each flap's own visible silhouette (its diagonal fold edges) —
+                  // since adjacent flaps sit flush against each other, their shadows overlap right at
+                  // the shared seams, reading as a shadowed border between panels rather than a flat
+                  // color boundary with nothing marking the edge.
+                  filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))',
                 }}
               />
             ))}
