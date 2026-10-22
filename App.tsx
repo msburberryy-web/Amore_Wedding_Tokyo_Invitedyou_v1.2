@@ -511,10 +511,18 @@ const App: React.FC = () => {
   const contentAnimationClass = (!data.visuals?.enableEnvelope || isEnvelopeOpen) && data.visuals?.enableAnimations ? 'fade-in' : 'opacity-0';
 
   return (
-    <div 
+    <div
       className="relative min-h-screen pb-24 overflow-x-hidden selection:bg-wedding-gold selection:text-white"
       style={styleVars}
     >
+      {/* Single fixed, viewport-sized backdrop — shared by header/main/footer so the artwork reads as
+          one continuous painting behind the whole scrolling page, never stretched/zoomed per-section. */}
+      {pageBgImage && (
+        <div
+          className="fixed inset-0 z-0 bg-cover bg-center pointer-events-none"
+          style={{ backgroundImage: `url(${pageBgImage})` }}
+        />
+      )}
       {!data.visuals?.enableAnimations && (
         <style>{`*, *::before, *::after { animation: none !important; transition: none !important; }`}</style>
       )}
@@ -556,7 +564,12 @@ const App: React.FC = () => {
       ) : (
         <>
         <header className="relative h-screen min-h-[700px] flex items-center justify-center text-center overflow-hidden">
-            <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${cacheBustedAsset(data.images?.hero || data.images?.pageBackground || DEFAULT_DATA.images.hero)})` }} />
+            {/* If this couple has their own hero photo, show it locally as before. If not but they
+                have a pageBackground, skip painting a second copy here — the single fixed backdrop
+                above already shows through, keeping it one continuous image with no seam. */}
+            {(data.images?.hero || !pageBgImage) && (
+              <div className="absolute inset-0 z-0 bg-cover bg-center" style={{ backgroundImage: `url(${cacheBustedAsset(data.images?.hero || DEFAULT_DATA.images.hero)})` }} />
+            )}
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
@@ -585,13 +598,11 @@ const App: React.FC = () => {
           <main
             className={`max-w-4xl mx-auto relative z-20 shadow-2xl pb-12 ${pageBgImage ? '' : 'bg-white'}`}
             style={pageBgImage ? {
-              // Painting shows fully through now — every content block below renders as its
-              // own floating parchment card (see cardClass), so nothing sits directly on the
-              // raw artwork except section headings/dividers, which are legible against it.
-              backgroundImage: `linear-gradient(rgba(10,14,28,0.18), rgba(10,14,28,0.18)), url(${pageBgImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'top center',
-              backgroundRepeat: 'no-repeat',
+              // No image here — the single fixed backdrop (rendered once, near the top of this
+              // component) shows through everywhere main doesn't paint its own content, so the
+              // painting reads as one continuous scene instead of being re-stretched per section.
+              // A flat (non-image) wash only, for the few headings that sit directly on it.
+              backgroundColor: 'rgba(10,14,28,0.12)',
             } : undefined}
           >
 
