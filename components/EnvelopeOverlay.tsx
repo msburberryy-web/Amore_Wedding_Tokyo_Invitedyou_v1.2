@@ -101,6 +101,20 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 }}
               />
             ))}
+            {/* Gold crease lines tracing where the 4 flaps meet — without this, all 4 panels are the
+                exact same flat color with no border, so the fold is invisible and opening them just
+                looks like a hard cut straight to the content underneath. Fades out as flaps open. */}
+            <svg
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              className={`absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-[1100ms] ${isOpeningOrLater ? 'opacity-0' : 'opacity-70'}`}
+              style={{ zIndex: artFlapZIndex + 1 }}
+            >
+              <line x1="0" y1="0" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
+              <line x1="100" y1="0" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
+              <line x1="0" y1="100" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
+              <line x1="100" y1="100" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
+            </svg>
             <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
               <img
                 src="./photos/khant_aye/wax-seal.png"
