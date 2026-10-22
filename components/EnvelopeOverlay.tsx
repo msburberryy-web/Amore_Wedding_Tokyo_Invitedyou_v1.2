@@ -12,7 +12,6 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const [stage, setStage] = useState<AnimationStage>('closed');
   // Opt-in painterly variant: deep blue envelope + gold monogram/seal instead of the default cream paper.
   const hasArt = !!data.images?.pageBackground;
-  const initials = `${(data.groomName?.en || '?').trim().charAt(0)}${(data.brideName?.en || '?').trim().charAt(0)}`.toUpperCase();
 
   const playPaperSound = () => {
       const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3'); 
@@ -54,61 +53,68 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const flapZIndex = isExtractingOrLater ? 1 : 30; 
 
   return (
-    <div 
-      className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-1000 ease-in-out ${isRevealing ? 'opacity-0 pointer-events-none' : 'opacity-100 bg-stone-900/90 backdrop-blur-sm'}`}
+    <div
+      className={`fixed inset-0 z-[100] flex items-center justify-center transition-all duration-1000 ease-in-out ${isRevealing ? 'opacity-0 pointer-events-none' : 'opacity-100 bg-stone-900/90 backdrop-blur-sm'} ${hasArt ? 'p-0' : 'p-4'}`}
       style={{ touchAction: 'none' }}
       onClick={startSequence}
     >
-      <div className="relative w-full max-w-lg perspective-1000">
-         <div className={`relative w-full aspect-[1.5] transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
-            <div className={`absolute inset-0 rounded-sm shadow-2xl overflow-hidden z-0 ${hasArt ? 'border border-wedding-gold/40' : 'border border-[#e6e2d8]'}`} style={hasArt ? { backgroundColor: '#1F2D52' } : { backgroundColor: '#f3f0e9' }}>
-                {hasArt ? (
-                  <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,214,140,0.25), transparent 40%), radial-gradient(circle at 80% 75%, rgba(255,214,140,0.18), transparent 38%)' }}></div>
-                ) : (
-                  <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
-                )}
+      <div className={hasArt ? 'relative w-full h-full' : 'relative w-full max-w-lg perspective-1000'} style={hasArt ? { perspective: '1000px' } : undefined}>
+        {hasArt ? (
+          // Full-screen, shapeless variant: no envelope silhouette (no triangular flap/body SVGs) —
+          // just two solid full-screen panels (top "flap", base) and a real wax-seal image as the
+          // open button, centered on screen. Reveal card below is shared with the default variant.
+          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }}>
+              <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,214,140,0.25), transparent 40%), radial-gradient(circle at 80% 75%, rgba(255,214,140,0.18), transparent 38%)' }}></div>
+            </div>
+            <div
+              className="absolute top-0 left-0 right-0 h-1/2 origin-top transition-transform duration-[800ms] ease-in-out"
+              style={{ zIndex: flapZIndex, transformStyle: 'preserve-3d', transform: isOpeningOrLater ? 'rotateX(180deg)' : 'rotateX(0deg)' }}
+            >
+              <div className="absolute inset-0" style={{ backgroundColor: '#1C2850', backfaceVisibility: 'hidden' }} />
+              <div className="absolute inset-0" style={{ backgroundColor: '#1F2D52', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }} />
+            </div>
+            <div className={`absolute inset-0 z-40 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
+              <img
+                src="./photos/khant_aye/wax-seal.png"
+                alt="Open invitation"
+                className="pointer-events-auto cursor-pointer w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 drop-shadow-2xl animate-pulse"
+              />
+            </div>
+          </div>
+        ) : (
+        <div className={`relative w-full aspect-[1.5] transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="absolute inset-0 rounded-sm shadow-2xl overflow-hidden z-0 border border-[#e6e2d8]" style={{ backgroundColor: '#f3f0e9' }}>
+                <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
             </div>
             <div className="absolute inset-0 z-20 pointer-events-none filter drop-shadow-md">
                 <svg viewBox="0 0 300 200" className="w-full h-full" preserveAspectRatio="none">
-                    <path d="M0,0 L140,110 L0,200 Z" fill={hasArt ? '#28396B' : '#e6e2d8'} />
-                    <path d="M300,0 L160,110 L300,200 Z" fill={hasArt ? '#28396B' : '#e6e2d8'} />
-                    <path d="M0,200 L150,90 L300,200 Z" fill={hasArt ? '#223160' : '#ece8df'} />
-                    <path d="M0,200 L150,90 L300,200" fill="none" stroke={hasArt ? '#D1A054' : '#dcd8cc'} strokeWidth="1" strokeOpacity={hasArt ? 0.4 : 1} />
+                    <path d="M0,0 L140,110 L0,200 Z" fill="#e6e2d8" />
+                    <path d="M300,0 L160,110 L300,200 Z" fill="#e6e2d8" />
+                    <path d="M0,200 L150,90 L300,200 Z" fill="#ece8df" />
+                    <path d="M0,200 L150,90 L300,200" fill="none" stroke="#dcd8cc" strokeWidth="1" />
                 </svg>
             </div>
-            {hasArt && (
-              <div className="absolute inset-x-0 z-20 pointer-events-none flex justify-center" style={{ top: '64%', transform: 'translateY(-50%)' }}>
-                <span className="font-script text-3xl md:text-4xl text-wedding-gold/90 tracking-wide">{initials.split('').join(' | ')}</span>
-              </div>
-            )}
             <div
-                className="absolute top-0 left-0 right-0 h-[53%] origin-top transition-transform duration-[800ms] ease-in-out"
+                className="absolute top-0 left-0 right-0 h-1/2 origin-top transition-transform duration-[800ms] ease-in-out"
                 style={{ zIndex: flapZIndex, transformStyle: 'preserve-3d', transform: isOpeningOrLater ? 'rotateX(180deg)' : 'rotateX(0deg)' }}
             >
-                 {/* Oversized relative to its own viewBox and slightly wider than the body on purpose —
-                     guarantees full overlap with the body's side-triangle seams so no base color shows
-                     through the gap regardless of sub-pixel rounding. */}
                  <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden' }}>
-                     <svg viewBox="0 0 300 100" className="w-full h-full overflow-visible" preserveAspectRatio="none"><path d="M-10,-5 L150,128 L310,-5 Z" fill={hasArt ? '#1C2850' : '#dcd8cc'} /></svg>
+                     <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none"><path d="M0,0 L150,110 L300,0 Z" fill="#dcd8cc" /></svg>
                      <div className={`absolute top-[90%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
                         <div className="relative group cursor-pointer animate-pulse">
-                            {hasArt ? (
-                              <div className="w-16 h-16 bg-[#D1A054] rounded-full border-4 border-[#8a6d2f] shadow-lg flex items-center justify-center">
-                                  <span className="text-[#1F2D52] font-serif italic font-bold text-sm">Open</span>
-                              </div>
-                            ) : (
-                              <div className="w-16 h-16 bg-[#8a1c1c] rounded-full border-4 border-[#701515] shadow-lg flex items-center justify-center">
-                                  <span className="text-white/90 font-serif italic font-bold text-sm">Open</span>
-                              </div>
-                            )}
+                            <div className="w-16 h-16 bg-[#8a1c1c] rounded-full border-4 border-[#701515] shadow-lg flex items-center justify-center">
+                                <span className="text-white/90 font-serif italic font-bold text-sm">Open</span>
+                            </div>
                         </div>
                      </div>
                  </div>
-                 <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: hasArt ? '#1F2D52' : '#f3f0e9', clipPath: 'polygon(0 0, 50% 100%, 100% 0)' }}>
+                 <div className="absolute inset-0 backface-hidden" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: '#f3f0e9', clipPath: 'polygon(0 0, 50% 100%, 100% 0)' }}>
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/paper.png')]"></div>
                  </div>
             </div>
          </div>
+        )}
 
          <div
             className={`shadow-lg rounded flex flex-col items-center justify-center text-center z-10 transition-all duration-[1000ms] cubic-bezier(0.4, 0, 0.2, 1) ${hasArt ? 'bg-[#1F2D52]' : 'bg-[#FDFBF7]'} ${isZoomingOrLater ? 'fixed inset-0 w-screen h-screen z-[1000] scale-100 rounded-none' : 'absolute left-4 right-4 top-4 bottom-4'}`}
