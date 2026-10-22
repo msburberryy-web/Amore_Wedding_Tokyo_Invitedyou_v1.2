@@ -67,6 +67,10 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   // transition ≈ 1200ms) than the default single-flap variant's drop point (400ms), so it needs
   // its own, later z-index drop — otherwise the reveal card would cover the flaps mid-animation.
   const artFlapZIndex = isZoomingOrLater ? 1 : 30;
+  // Where the 4 flaps meet when closed, pushed down from dead-center (50%) so the top flap reads as
+  // the dominant envelope flap (like a real closed envelope) instead of 4 equal wedges forming a
+  // symmetric X/cross.
+  const ART_MEET_Y = 58;
 
   return (
     <div
@@ -90,10 +94,22 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
           <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
             <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }} />
             {([
-              { clip: 'polygon(0 0, 100% 0, 50% 50%)', origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms' },
-              { clip: 'polygon(0 100%, 100% 100%, 50% 50%)', origin: 'bottom center', openT: 'rotateX(175deg)', delay: '300ms' },
-              { clip: 'polygon(0 0, 50% 50%, 0 100%)', origin: 'left center', openT: 'rotateY(175deg)', delay: '120ms' },
-              { clip: 'polygon(100% 0, 100% 100%, 50% 50%)', origin: 'right center', openT: 'rotateY(-175deg)', delay: '120ms' },
+              {
+                clip: `polygon(0 0, 100% 0, 50% ${ART_MEET_Y}%)`, origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms',
+                fold: 'linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(0,0,0,0.05) 55%, rgba(0,0,0,0.32))',
+              },
+              {
+                clip: `polygon(0 100%, 100% 100%, 50% ${ART_MEET_Y}%)`, origin: 'bottom center', openT: 'rotateX(175deg)', delay: '300ms',
+                fold: 'linear-gradient(to top, rgba(0,0,0,0.04), rgba(0,0,0,0.30))',
+              },
+              {
+                clip: `polygon(0 0, 50% ${ART_MEET_Y}%, 0 100%)`, origin: 'left center', openT: 'rotateY(175deg)', delay: '120ms',
+                fold: 'linear-gradient(to right, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
+              },
+              {
+                clip: `polygon(100% 0, 50% ${ART_MEET_Y}%, 100% 100%)`, origin: 'right center', openT: 'rotateY(-175deg)', delay: '120ms',
+                fold: 'linear-gradient(to left, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
+              },
             ] as const).map((flap, i) => (
               <div
                 key={i}
@@ -108,25 +124,31 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                   transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
                   transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
                   backgroundColor: '#1F2D52',
-                  backgroundImage: 'radial-gradient(circle at 30% 20%, rgba(255,214,140,0.1), transparent 35%), radial-gradient(circle at 70% 75%, rgba(255,214,140,0.08), transparent 30%)',
+                  backgroundImage: `${flap.fold}, radial-gradient(circle at 30% 20%, rgba(255,214,140,0.08), transparent 35%)`,
                 }}
               />
             ))}
-            {/* Gold crease lines tracing where the 4 flaps meet — without this, all 4 panels are the
-                exact same flat color with no border, so the fold is invisible and opening them just
-                looks like a hard cut straight to the content underneath. Fades out as flaps open. */}
-            <svg
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              className={`absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-[1100ms] ${isOpeningOrLater ? 'opacity-0' : 'opacity-70'}`}
-              style={{ zIndex: artFlapZIndex + 1 }}
+            {/* Soft shadow where all 4 folds overlap/tuck together, like the slight pucker at the
+                center of a real closed envelope — replaces the old flat gold cross-lines, which read
+                as a decorative "X" rather than actual paper. Combined with each flap's own directional
+                fold shading above, the seams between panels now read as creases/depth instead of a
+                thin uniform-color boundary. Fades out as flaps open. */}
+            <div
+              className={`absolute pointer-events-none transition-opacity duration-500 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}
+              style={{
+                left: '50%',
+                top: `${ART_MEET_Y}%`,
+                width: '36%',
+                height: '24%',
+                transform: 'translate(-50%, -50%)',
+                background: 'radial-gradient(circle, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.16) 45%, transparent 75%)',
+                zIndex: artFlapZIndex + 1,
+              }}
+            />
+            <div
+              className={`absolute flex flex-col items-center gap-3 pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}
+              style={{ left: '50%', top: `${ART_MEET_Y}%`, transform: 'translate(-50%, -50%)', zIndex: artFlapZIndex + 2 }}
             >
-              <line x1="0" y1="0" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
-              <line x1="100" y1="0" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
-              <line x1="0" y1="100" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
-              <line x1="100" y1="100" x2="50" y2="50" stroke="#D1A054" strokeWidth="0.3" />
-            </svg>
-            <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
               <img
                 src="./photos/khant_aye/wax-seal.png"
                 alt="Open invitation"
