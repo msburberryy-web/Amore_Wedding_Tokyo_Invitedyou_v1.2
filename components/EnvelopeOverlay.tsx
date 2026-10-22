@@ -63,7 +63,7 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
       style={{ touchAction: 'none' }}
       onClick={startSequence}
     >
-      <div className={hasArt ? 'relative w-full h-full' : 'relative w-full max-w-lg perspective-1000'} style={hasArt ? { perspective: '1000px' } : undefined}>
+      <div className={hasArt ? 'relative w-full h-full' : 'relative w-full max-w-lg perspective-1000'} style={hasArt ? { perspective: '1600px' } : undefined}>
         {hasArt ? (
           // Full-screen folded-paper variant: no envelope silhouette — 4 triangular flaps meeting at
           // center (clip-path, not a literal envelope outline), a real wax-seal image as the open
@@ -71,7 +71,12 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
           // past 90°, backface-hidden, so it simply vanishes rather than showing a mirrored back) in
           // a staggered order (top, then sides, then bottom) purely via CSS transition-delay — the
           // underlying open/closed state is still just the existing stage machine, unchanged.
-          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`} style={{ perspective: '1600px' }}>
+          // IMPORTANT: perspective lives on the shared parent above, not here — a `perspective`
+          // value on this div would establish its own nested stacking context (per spec, same as
+          // `transform`), trapping the flaps' z-index inside it and letting the reveal-card sibling
+          // (explicit z-index: 10, in the outer context) paint over the whole thing regardless of
+          // the flaps' z-index: 30 — that was the actual bug behind "I don't see the envelope at all".
+          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
             <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }} />
             {([
               { clip: 'polygon(0 0, 100% 0, 50% 50%)', origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms' },
