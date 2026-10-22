@@ -146,7 +146,21 @@ const App: React.FC = () => {
   }
 
   const [data, setData] = useState<WeddingData>(DEFAULT_DATA);
-  const [assetVersion] = useState(() => Date.now().toString());
+  // Cache-busting key for photos (hero/groom/bride/gallery/pageBackground). Reuses the same
+  // build-stable VITE_ASSET_VERSION (git sha, stamped by CI — see deploy.yml) already used below for
+  // the JSON data fetch, instead of a fresh Date.now() on every single page load. A fresh timestamp
+  // every visit meant every photo was refetched from scratch every time with zero browser caching —
+  // on a flaky/mobile connection that turned an occasional network hiccup into a photo that silently
+  // and permanently disappears for that visit (onError hides it with no retry). Falls back to a
+  // fixed string in local dev, where Vite's own dev server already handles freshness.
+  const [assetVersion] = useState(() => {
+    try {
+      // @ts-ignore
+      return (import.meta as any)?.env?.VITE_ASSET_VERSION || 'dev';
+    } catch {
+      return 'dev';
+    }
+  });
   
   // App Modes
   const [isAdminAvailable, setIsAdminAvailable] = useState(false);
@@ -464,6 +478,22 @@ const App: React.FC = () => {
     return `${url}${url.includes('?') ? '&' : '?'}v=${assetVersion}`;
   };
 
+  // A photo that fails to load gets exactly one automatic retry (fresh request, bypassing any bad
+  // cached response) before giving up — recovers from a transient network blip instead of silently
+  // and permanently hiding that photo for the rest of the visit. hideSelector lets the caller hide an
+  // ancestor (e.g. the gallery's grid cell) instead of just the <img> itself.
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>, hideSelector?: string) => {
+    const img = e.currentTarget;
+    if (img.dataset.retried) {
+      const target = hideSelector ? (img.closest(hideSelector) as HTMLElement | null) : img;
+      if (target) target.style.display = 'none';
+      return;
+    }
+    img.dataset.retried = '1';
+    const base = img.src.split('?')[0];
+    img.src = `${base}?retry=${Date.now()}`;
+  };
+
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
   const pageBgImage = data.images?.pageBackground ? cacheBustedAsset(data.images.pageBackground) : '';
@@ -644,7 +674,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={handleImageError} />
                              </div>
                         </div>
                         <div className="mt-6">
@@ -659,7 +689,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={handleImageError} />
                              </div>
                         </div>
                          <div className="mt-6">
@@ -751,7 +781,7 @@ const App: React.FC = () => {
                     <div className="columns-2 md:columns-3 gap-3 space-y-3">
                         {data.gallery.map((img, idx) => (
                             <div key={idx} className="break-inside-avoid overflow-hidden rounded-sm shadow-sm">
-                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" onError={(e) => { const c = (e.currentTarget as HTMLElement).closest('.break-inside-avoid') as HTMLElement; if (c) c.style.display = 'none'; }} />
+                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" onError={(e) => handleImageError(e, '.break-inside-avoid')} />
                             </div>
                         ))}
                     </div>
