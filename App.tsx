@@ -483,8 +483,21 @@ const App: React.FC = () => {
     '--color-primary': hexToRgb(theme.primary),
     '--color-text': hexToRgb(theme.text),
     '--color-bg-tint': hexToRgb(theme.backgroundTint),
-    '--font-main': activeFont ? activeFont.replace(/"/g, '') : 'serif', 
+    '--font-main': activeFont ? activeFont.replace(/"/g, '') : 'serif',
   } as React.CSSProperties;
+
+  // Preload the page-background artwork as early as possible (while the envelope is still
+  // closed, before the user even clicks to open it) so it's already cached by the time the
+  // envelope-opening animation finishes and the page is revealed — avoids a visible load-in.
+  useEffect(() => {
+    if (!pageBgImage) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = pageBgImage;
+    document.head.appendChild(link);
+    return () => { document.head.removeChild(link); };
+  }, [pageBgImage]);
 
   // Log actual DOM iframe src after the merged mapUrl is applied so we can detect differences in deployed builds
   useEffect(() => {
