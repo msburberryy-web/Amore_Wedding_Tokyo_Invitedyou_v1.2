@@ -26,13 +26,24 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
     playPaperSound();
     setStage('opening');
     document.body.style.overflow = '';
-    setTimeout(() => setStage('extracting'), 400);
-    setTimeout(() => setStage('zooming'), 1400);
-    setTimeout(() => {
+    if (hasArt) {
+      // No paper/card stage for this variant — once the 4 flaps have folded away (~1.2s, see the
+      // staggered delays below), go straight to revealing the actual website underneath instead of
+      // showing an intermediate "Invitation" card first.
+      setTimeout(() => {
         setStage('revealing');
-        onOpen(); 
-    }, 2400); 
-    setTimeout(() => setStage('finished'), 3500); 
+        onOpen();
+      }, 1300);
+      setTimeout(() => setStage('finished'), 2350);
+    } else {
+      setTimeout(() => setStage('extracting'), 400);
+      setTimeout(() => setStage('zooming'), 1400);
+      setTimeout(() => {
+          setStage('revealing');
+          onOpen();
+      }, 2400);
+      setTimeout(() => setStage('finished'), 3500);
+    }
   };
 
   useEffect(() => {
@@ -124,7 +135,7 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 onMouseLeave={() => setSealPressed(false)}
                 onTouchStart={() => setSealPressed(true)}
                 onTouchEnd={() => setSealPressed(false)}
-                className={`pointer-events-auto cursor-pointer w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 drop-shadow-2xl transition-transform duration-150 ${sealPressed ? 'scale-90' : 'scale-100 animate-pulse'}`}
+                className={`pointer-events-auto cursor-pointer w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 drop-shadow-2xl transition-transform duration-150 ${sealPressed ? 'scale-90' : 'scale-100'}`}
               />
               <span className="text-wedding-gold/90 text-[10px] tracking-[0.3em] uppercase font-serif">Open Invitation</span>
             </div>
@@ -163,19 +174,23 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
          </div>
         )}
 
+        {/* Paper/card reveal stage — only for the default variant. The art variant goes straight
+            from flaps-open to the actual website (see startSequence), no intermediate card. */}
+        {!hasArt && (
          <div
-            className={`shadow-lg rounded flex flex-col items-center justify-center text-center z-10 transition-all duration-[1000ms] cubic-bezier(0.4, 0, 0.2, 1) ${hasArt ? 'bg-[#1F2D52]' : 'bg-[#FDFBF7]'} ${isZoomingOrLater ? 'fixed inset-0 w-screen h-screen z-[1000] scale-100 rounded-none' : 'absolute left-4 right-4 top-4 bottom-4'}`}
+            className={`shadow-lg rounded flex flex-col items-center justify-center text-center z-10 bg-[#FDFBF7] transition-all duration-[1000ms] cubic-bezier(0.4, 0, 0.2, 1) ${isZoomingOrLater ? 'fixed inset-0 w-screen h-screen z-[1000] scale-100 rounded-none' : 'absolute left-4 right-4 top-4 bottom-4'}`}
             style={{ transform: !isZoomingOrLater && isExtractingOrLater ? 'translateY(-60%)' : 'translateY(0)', zIndex: isZoomingOrLater ? 100 : 10 }}
          >
             <div className={`w-full h-full flex flex-col items-center justify-center border border-wedding-gold/30 p-4 md:p-8 transition-opacity duration-500 ${isRevealing ? 'opacity-0' : 'opacity-100'}`}>
                 <p className="text-wedding-gold text-[10px] md:text-xs tracking-[0.4em] uppercase mb-6 md:mb-8">Invitation</p>
-                <h2 className={`font-serif text-xl sm:text-2xl md:text-3xl mb-3 md:mb-4 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 ${hasArt ? 'text-[#F6EFE1]' : 'text-gray-800'}`}>{data.groomName.en}</h2>
+                <h2 className="font-serif text-xl sm:text-2xl md:text-3xl mb-3 md:mb-4 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 text-gray-800">{data.groomName.en}</h2>
                 <span className="text-base md:text-lg text-wedding-gold font-script italic mb-3 md:mb-4">&</span>
-                <h2 className={`font-serif text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 ${hasArt ? 'text-[#F6EFE1]' : 'text-gray-800'}`}>{data.brideName.en}</h2>
+                <h2 className="font-serif text-xl sm:text-2xl md:text-3xl mb-6 md:mb-8 uppercase tracking-[0.15em] md:tracking-[0.3em] font-light break-words w-full px-2 text-gray-800">{data.brideName.en}</h2>
                 <div className="w-12 h-[1px] bg-wedding-gold mb-4"></div>
-                <p className={`text-[10px] md:text-xs font-serif uppercase tracking-widest ${hasArt ? 'text-[#D1A054]/80' : 'text-gray-500'}`}>{new Date(data.date).toLocaleDateString()}</p>
+                <p className="text-[10px] md:text-xs font-serif uppercase tracking-widest text-gray-500">{new Date(data.date).toLocaleDateString()}</p>
             </div>
          </div>
+        )}
       </div>
     </div>
   );
