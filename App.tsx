@@ -624,12 +624,12 @@ const App: React.FC = () => {
             </section>
 
              {/* Profile Section - Refined for Piary Look (Cleaner, no rotation on mobile) */}
-             <section className={`py-20 px-6 overflow-hidden ${pageBgImage ? '' : 'bg-[#faf9f6]'}`} style={nightBandStyle}>
+             <section className={`py-20 px-6 overflow-hidden ${pageBgImage ? '' : 'bg-[#faf9f6]'}`}>
                 <div className="flex flex-col md:flex-row justify-center items-center gap-12 md:gap-24 relative max-w-5xl mx-auto">
                     
                     {/* Groom */}
                     <div className="relative group text-center w-full max-w-xs">
-                        <div className="aspect-[3/4] overflow-hidden relative shadow-md bg-white p-2">
+                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
                                 <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                              </div>
@@ -644,7 +644,7 @@ const App: React.FC = () => {
 
                     {/* Bride */}
                     <div className="relative group text-center w-full max-w-xs">
-                        <div className="aspect-[3/4] overflow-hidden relative shadow-md bg-white p-2">
+                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
                                 <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                              </div>
