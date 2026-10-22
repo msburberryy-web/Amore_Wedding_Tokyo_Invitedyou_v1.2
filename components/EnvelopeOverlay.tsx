@@ -10,6 +10,7 @@ type AnimationStage = 'closed' | 'opening' | 'extracting' | 'zooming' | 'reveali
 
 const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const [stage, setStage] = useState<AnimationStage>('closed');
+  const [sealPressed, setSealPressed] = useState(false);
   // Opt-in painterly variant: deep blue envelope + gold monogram/seal instead of the default cream paper.
   const hasArt = !!data.images?.pageBackground;
 
@@ -50,7 +51,11 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
   const isExtractingOrLater = ['extracting', 'zooming', 'revealing', 'finished'].includes(stage);
   const isZoomingOrLater = ['zooming', 'revealing', 'finished'].includes(stage);
   const isRevealing = stage === 'revealing';
-  const flapZIndex = isExtractingOrLater ? 1 : 30; 
+  const flapZIndex = isExtractingOrLater ? 1 : 30;
+  // The 4-flap art variant takes longer to fully clear (staggered delays up to 300ms + 900ms
+  // transition ≈ 1200ms) than the default single-flap variant's drop point (400ms), so it needs
+  // its own, later z-index drop — otherwise the reveal card would cover the flaps mid-animation.
+  const artFlapZIndex = isZoomingOrLater ? 1 : 30;
 
   return (
     <div
@@ -60,26 +65,49 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
     >
       <div className={hasArt ? 'relative w-full h-full' : 'relative w-full max-w-lg perspective-1000'} style={hasArt ? { perspective: '1000px' } : undefined}>
         {hasArt ? (
-          // Full-screen, shapeless variant: no envelope silhouette (no triangular flap/body SVGs) —
-          // just two solid full-screen panels (top "flap", base) and a real wax-seal image as the
-          // open button, centered on screen. Reveal card below is shared with the default variant.
-          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`}>
-            <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }}>
-              <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(255,214,140,0.25), transparent 40%), radial-gradient(circle at 80% 75%, rgba(255,214,140,0.18), transparent 38%)' }}></div>
-            </div>
-            <div
-              className="absolute top-0 left-0 right-0 h-1/2 origin-top transition-transform duration-[800ms] ease-in-out"
-              style={{ zIndex: flapZIndex, transformStyle: 'preserve-3d', transform: isOpeningOrLater ? 'rotateX(180deg)' : 'rotateX(0deg)' }}
-            >
-              <div className="absolute inset-0" style={{ backgroundColor: '#1C2850', backfaceVisibility: 'hidden' }} />
-              <div className="absolute inset-0" style={{ backgroundColor: '#1F2D52', backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }} />
-            </div>
-            <div className={`absolute inset-0 z-40 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
+          // Full-screen folded-paper variant: no envelope silhouette — 4 triangular flaps meeting at
+          // center (clip-path, not a literal envelope outline), a real wax-seal image as the open
+          // button, and the same shared reveal-card below. Flaps fold away via 3D rotation (each
+          // past 90°, backface-hidden, so it simply vanishes rather than showing a mirrored back) in
+          // a staggered order (top, then sides, then bottom) purely via CSS transition-delay — the
+          // underlying open/closed state is still just the existing stage machine, unchanged.
+          <div className={`absolute inset-0 transition-all duration-1000 ease-in-out ${isZoomingOrLater ? 'opacity-0' : 'opacity-100'}`} style={{ perspective: '1600px' }}>
+            <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }} />
+            {([
+              { clip: 'polygon(0 0, 100% 0, 50% 50%)', origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms' },
+              { clip: 'polygon(0 100%, 100% 100%, 50% 50%)', origin: 'bottom center', openT: 'rotateX(175deg)', delay: '300ms' },
+              { clip: 'polygon(0 0, 50% 50%, 0 100%)', origin: 'left center', openT: 'rotateY(175deg)', delay: '120ms' },
+              { clip: 'polygon(100% 0, 100% 100%, 50% 50%)', origin: 'right center', openT: 'rotateY(-175deg)', delay: '120ms' },
+            ] as const).map((flap, i) => (
+              <div
+                key={i}
+                className="absolute inset-0 transition-transform duration-[900ms]"
+                style={{
+                  zIndex: artFlapZIndex,
+                  clipPath: flap.clip,
+                  transformOrigin: flap.origin,
+                  transformStyle: 'preserve-3d',
+                  backfaceVisibility: 'hidden',
+                  transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                  transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
+                  transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
+                  backgroundColor: '#1F2D52',
+                  backgroundImage: 'radial-gradient(circle at 30% 20%, rgba(255,214,140,0.1), transparent 35%), radial-gradient(circle at 70% 75%, rgba(255,214,140,0.08), transparent 30%)',
+                }}
+              />
+            ))}
+            <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 pointer-events-none transition-opacity duration-300 ${isOpeningOrLater ? 'opacity-0' : 'opacity-100'}`}>
               <img
                 src="./photos/khant_aye/wax-seal.png"
                 alt="Open invitation"
-                className="pointer-events-auto cursor-pointer w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 drop-shadow-2xl animate-pulse"
+                onMouseDown={() => setSealPressed(true)}
+                onMouseUp={() => setSealPressed(false)}
+                onMouseLeave={() => setSealPressed(false)}
+                onTouchStart={() => setSealPressed(true)}
+                onTouchEnd={() => setSealPressed(false)}
+                className={`pointer-events-auto cursor-pointer w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 drop-shadow-2xl transition-transform duration-150 ${sealPressed ? 'scale-90' : 'scale-100 animate-pulse'}`}
               />
+              <span className="text-wedding-gold/90 text-[10px] tracking-[0.3em] uppercase font-serif">Open Invitation</span>
             </div>
           </div>
         ) : (
