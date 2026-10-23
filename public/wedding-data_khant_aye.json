@@ -154,7 +154,7 @@
     "./photos/khant_aye/gallery4.jpg",
     "./photos/khant_aye/gallery5.jpg"
   ],
-  "musicUrl": "",
+  "musicUrl": "./photos/khant_aye/background-music.mp3",
   "images": {
     "hero": "",
     "groom": "./photos/khant_aye/groom.jpg",
