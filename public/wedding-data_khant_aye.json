@@ -152,11 +152,13 @@
     "./photos/khant_aye/gallery2.jpg",
     "./photos/khant_aye/gallery3.jpg",
     "./photos/khant_aye/gallery4.jpg",
-    "./photos/khant_aye/gallery5.jpg"
+    "./photos/khant_aye/gallery5.jpg",
+    "./photos/khant_aye/gallery6.jpg",
+    "./photos/khant_aye/gallery7.jpg"
   ],
   "musicUrl": "./photos/khant_aye/background-music.mp3",
   "images": {
-    "hero": "",
+    "hero": "./photos/khant_aye/cover.jpg",
     "groom": "./photos/khant_aye/groom.jpg",
     "bride": "./photos/khant_aye/bride.jpg",
     "pageBackground": "./photos/khant_aye/page-bg-terrace.jpg"
