@@ -123,47 +123,88 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
             style={{ opacity: isOpeningOrLater ? 0 : 1, transition: `opacity ${ART_FADE_DURATION_MS}ms ease-in-out ${ART_FADE_DELAY_MS}ms` }}
           >
             <div className="absolute inset-0 z-0" style={{ backgroundColor: '#1F2D52' }} />
-            {([
-              {
-                clip: `polygon(0 0, 100% 0, 50% ${ART_MEET_Y}%)`, origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms',
-                fold: 'linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(0,0,0,0.05) 55%, rgba(0,0,0,0.32))',
-              },
-              {
-                clip: `polygon(0 100%, 100% 100%, 50% ${ART_MEET_Y}%)`, origin: 'bottom center', openT: 'rotateX(175deg)', delay: '500ms',
-                fold: 'linear-gradient(to top, rgba(0,0,0,0.04), rgba(0,0,0,0.30))',
-              },
-              {
-                clip: `polygon(0 0, 50% ${ART_MEET_Y}%, 0 100%)`, origin: 'left center', openT: 'rotateY(175deg)', delay: '200ms',
-                fold: 'linear-gradient(to right, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
-              },
-              {
-                clip: `polygon(100% 0, 50% ${ART_MEET_Y}%, 100% 100%)`, origin: 'right center', openT: 'rotateY(-175deg)', delay: '200ms',
-                fold: 'linear-gradient(to left, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
-              },
-            ] as const).map((flap, i) => (
-              <div
-                key={i}
-                className="absolute inset-0 transition-transform"
-                style={{
-                  zIndex: artFlapZIndex,
-                  clipPath: flap.clip,
-                  transformOrigin: flap.origin,
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
-                  transitionDuration: `${ART_FLAP_DURATION_MS}ms`,
-                  transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
-                  transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
-                  transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
-                  backgroundColor: '#1F2D52',
-                  backgroundImage: `${flap.fold}, radial-gradient(circle at 30% 20%, rgba(255,214,140,0.08), transparent 35%)`,
-                  // Soft shadow along each flap's own visible silhouette (its diagonal fold edges) —
-                  // since adjacent flaps sit flush against each other, their shadows overlap right at
-                  // the shared seams, reading as a shadowed border between panels rather than a flat
-                  // color boundary with nothing marking the edge.
-                  filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))',
-                }}
-              />
-            ))}
+            {(() => {
+              const flaps = [
+                {
+                  clip: `polygon(0 0, 100% 0, 50% ${ART_MEET_Y}%)`, points: `0,0 100,0 50,${ART_MEET_Y}`, origin: 'top center', openT: 'rotateX(-175deg)', delay: '0ms',
+                  fold: 'linear-gradient(to bottom, rgba(255,255,255,0.07), rgba(0,0,0,0.05) 55%, rgba(0,0,0,0.32))',
+                },
+                {
+                  clip: `polygon(0 100%, 100% 100%, 50% ${ART_MEET_Y}%)`, points: `0,100 100,100 50,${ART_MEET_Y}`, origin: 'bottom center', openT: 'rotateX(175deg)', delay: '500ms',
+                  fold: 'linear-gradient(to top, rgba(0,0,0,0.04), rgba(0,0,0,0.30))',
+                },
+                {
+                  clip: `polygon(0 0, 50% ${ART_MEET_Y}%, 0 100%)`, points: `0,0 50,${ART_MEET_Y} 0,100`, origin: 'left center', openT: 'rotateY(175deg)', delay: '200ms',
+                  fold: 'linear-gradient(to right, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
+                },
+                {
+                  clip: `polygon(100% 0, 50% ${ART_MEET_Y}%, 100% 100%)`, points: `100,0 50,${ART_MEET_Y} 100,100`, origin: 'right center', openT: 'rotateY(-175deg)', delay: '200ms',
+                  fold: 'linear-gradient(to left, rgba(255,255,255,0.05), rgba(0,0,0,0.26))',
+                },
+              ];
+              // Each flap's fill is rendered first (this loop), then every flap's border is rendered
+              // in a second pass below — so no flap's opaque fill can paint over a neighboring flap's
+              // border line at their shared seam.
+              // NOTE: borders are drawn as SVG <polygon> strokes synced to the same 3D transform,
+              // not a CSS `filter: drop-shadow`. drop-shadow combined with clip-path + 3D transforms
+              // (transform-style: preserve-3d, under a perspective ancestor) is a known WebKit/Safari
+              // rendering bug trigger — on a real iPhone it rendered as a broken, wrongly-colored thick
+              // glow instead of a soft shadow. An SVG stroke has none of that fragility and gives an
+              // exact, reliable border.
+              return (
+                <>
+                  {flaps.map((flap, i) => (
+                    <div
+                      key={`fill-${i}`}
+                      className="absolute inset-0 transition-transform"
+                      style={{
+                        zIndex: artFlapZIndex,
+                        clipPath: flap.clip,
+                        transformOrigin: flap.origin,
+                        transformStyle: 'preserve-3d',
+                        backfaceVisibility: 'hidden',
+                        transitionDuration: `${ART_FLAP_DURATION_MS}ms`,
+                        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                        transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
+                        transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
+                        backgroundColor: '#1F2D52',
+                        backgroundImage: `${flap.fold}, radial-gradient(circle at 30% 20%, rgba(255,214,140,0.08), transparent 35%)`,
+                      }}
+                    />
+                  ))}
+                  {flaps.map((flap, i) => (
+                    <svg
+                      key={`border-${i}`}
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      style={{
+                        zIndex: artFlapZIndex + 1,
+                        transformOrigin: flap.origin,
+                        transformStyle: 'preserve-3d',
+                        backfaceVisibility: 'hidden',
+                        transitionProperty: 'transform',
+                        transitionDuration: `${ART_FLAP_DURATION_MS}ms`,
+                        transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
+                        transitionDelay: isOpeningOrLater ? flap.delay : '0ms',
+                        transform: isOpeningOrLater ? flap.openT : 'rotateX(0deg) rotateY(0deg)',
+                      }}
+                    >
+                      <polygon
+                        points={flap.points}
+                        fill="none"
+                        stroke="#D1A054"
+                        strokeOpacity={0.55}
+                        strokeWidth={1.4}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  ))}
+                </>
+              );
+            })()}
             {/* Soft shadow where all 4 folds overlap/tuck together, like the slight pucker at the
                 center of a real closed envelope — replaces the old flat gold cross-lines, which read
                 as a decorative "X" rather than actual paper. Combined with each flap's own directional
