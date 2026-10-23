@@ -146,6 +146,11 @@ const App: React.FC = () => {
   }
 
   const [data, setData] = useState<WeddingData>(DEFAULT_DATA);
+  // Tracks whether the couple's real JSON (or a fallback) has actually loaded — the envelope reads
+  // this to avoid flashing the WRONG envelope style at first paint. data starts as DEFAULT_DATA
+  // (no pageBackground), so a couple whose real data sets pageBackground briefly rendered the
+  // plain default envelope before their own themed one swapped in a moment later.
+  const [dataLoaded, setDataLoaded] = useState(false);
   // Cache-busting key for photos (hero/groom/bride/gallery/pageBackground). Reuses the same
   // build-stable VITE_ASSET_VERSION (git sha, stamped by CI — see deploy.yml) already used below for
   // the JSON data fetch, instead of a fresh Date.now() on every single page load. A fresh timestamp
@@ -327,6 +332,7 @@ const App: React.FC = () => {
         }
 
         setData(merged);
+        setDataLoaded(true);
       })
       .catch((e) => {
          console.log("Using default/local data (" + e.message + ")");
@@ -337,6 +343,7 @@ const App: React.FC = () => {
              setData({ ...DEFAULT_DATA, ...JSON.parse(saved) });
            } catch (e) { localStorage.removeItem('amore_wedding_data'); }
          }
+         setDataLoaded(true);
       });
   }, []);
 
@@ -570,7 +577,7 @@ const App: React.FC = () => {
         <style>{`*, *::before, *::after { animation: none !important; transition: none !important; }`}</style>
       )}
 
-      {showEnvelope && <EnvelopeOverlay data={data} onOpen={handleEnvelopeOpen} />}
+      {showEnvelope && <EnvelopeOverlay data={data} dataLoaded={dataLoaded} onOpen={handleEnvelopeOpen} />}
 
       <LanguageSwitch current={lang} onChange={setLang} />
       

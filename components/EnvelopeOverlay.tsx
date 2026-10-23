@@ -3,6 +3,7 @@ import { WeddingData } from '../types';
 
 interface Props {
   data: WeddingData;
+  dataLoaded: boolean;
   onOpen: () => void;
 }
 
@@ -16,7 +17,7 @@ const ART_FADE_DELAY_MS = 600; // backdrop + flaps stay fully closed/opaque for 
 const ART_FADE_DURATION_MS = 900; // then fade to fully transparent over this long
 const ART_REVEAL_MS = ART_FADE_DELAY_MS + ART_FADE_DURATION_MS + 50; // unmount shortly after the fade finishes, while flaps are still mid-rotation
 
-const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
+const EnvelopeOverlay: React.FC<Props> = ({ data, dataLoaded, onOpen }) => {
   const [stage, setStage] = useState<AnimationStage>('closed');
   const [sealPressed, setSealPressed] = useState(false);
   // Opt-in painterly variant: deep blue envelope + gold monogram/seal instead of the default cream paper.
@@ -68,6 +69,16 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
       document.body.style.overflow = '';
     };
   }, [stage]);
+
+  // Before the couple's real data has loaded, `data` is still DEFAULT_DATA (no pageBackground), so
+  // `hasArt` below would be false and this would render the plain default envelope — then, a moment
+  // later once the real data arrives and hasArt flips true, swap to the 4-flap art variant. That
+  // swap was visible as the wrong envelope style flashing at first paint for any hasArt couple.
+  // Rendering a neutral blocking cover (same resting color as the real backdrop below) until
+  // dataLoaded avoids ever showing a specific envelope style that might not match the real one.
+  if (!dataLoaded) {
+    return <div className="fixed inset-0 z-[100] bg-stone-900/90 backdrop-blur-sm" style={{ touchAction: 'none' }} />;
+  }
 
   if (stage === 'finished') return null;
 
