@@ -31,7 +31,10 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
 
   const startSequence = () => {
     if (stage !== 'closed') return;
-    playPaperSound();
+    // Skip the generic paper-rustle sound effect for the hasArt variant — this couple has their own
+    // background music track (data.musicUrl, started by App.tsx once onOpen() fires below), and
+    // playing both together is exactly the "two tracks at once" overlap that was reported.
+    if (!hasArt) playPaperSound();
     setStage('opening');
     document.body.style.overflow = '';
     if (hasArt) {
