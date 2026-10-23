@@ -236,7 +236,6 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, onOpen }) => {
                 onTouchEnd={() => setSealPressed(false)}
                 className={`pointer-events-auto cursor-pointer w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 drop-shadow-2xl transition-transform duration-150 ${sealPressed ? 'scale-90' : 'scale-100'}`}
               />
-              <span className="text-wedding-gold/90 text-[10px] tracking-[0.3em] uppercase font-serif">Open Invitation</span>
             </div>
           </div>
         ) : (
