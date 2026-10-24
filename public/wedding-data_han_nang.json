@@ -148,16 +148,16 @@
   ],
   "showGallery": true,
   "gallery": [
-    "./photos/han_nang/gallery1.jpg",
-    "./photos/han_nang/gallery2.jpg",
-    "./photos/han_nang/gallery3.jpg",
-    "./photos/han_nang/gallery4.jpg",
-    "./photos/han_nang/gallery5.jpg",
-    "./photos/han_nang/gallery6.jpg",
-    "./photos/han_nang/gallery7.jpg",
-    "./photos/han_nang/gallery8.jpg",
-    "./photos/han_nang/gallery9.jpg",
-    "./photos/han_nang/gallery10.jpg"
+    "./photos/[event-folder]/gallery1.jpg",
+    "./photos/[event-folder]/gallery2.jpg",
+    "./photos/[event-folder]/gallery3.jpg",
+    "./photos/[event-folder]/gallery4.jpg",
+    "./photos/[event-folder]/gallery5.jpg",
+    "./photos/[event-folder]/gallery6.jpg",
+    "./photos/[event-folder]/gallery7.jpg",
+    "./photos/[event-folder]/gallery8.jpg",
+    "./photos/[event-folder]/gallery9.jpg",
+    "./photos/[event-folder]/gallery10.jpg"
   ],
   "musicUrl": "",
   "images": {
