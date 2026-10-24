@@ -657,12 +657,12 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center relative z-10 w-full px-4">
                     <p className="text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2">{t.saveTheDate}</p>
                     
-                    <h1 className={`${pageBgImage ? 'font-script-khant text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] tracking-normal' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em]'} mb-2 md:mb-4 drop-shadow-2xl ${pageBgImage ? '' : 'text-white'} flex flex-col md:flex-row flex-wrap justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
-                        style={pageBgImage ? { color: '#FFD700' } : undefined}
+                    <h1 className={`${pageBgImage ? 'font-script-khant text-2xl sm:text-5xl md:text-8xl lg:text-9xl tracking-normal flex-row flex-nowrap' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} mb-2 md:mb-4 ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+                        style={pageBgImage ? { color: '#FFFFFF', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}
                     >
-                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
-                            <span className={`${pageBgImage ? 'text-3xl md:text-5xl' : 'text-xl md:text-3xl'} align-middle mx-2 md:mx-4 ${pageBgImage ? '' : 'text-wedding-gold/90'} my-1 md:my-2 lowercase italic tracking-normal normal-case ${pageBgImage ? 'font-script-khant' : 'font-script'}`} style={pageBgImage ? { color: '#FFD700' } : undefined}>&</span>
-                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
+                            <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
+                            <span className={`${pageBgImage ? 'text-lg sm:text-3xl md:text-5xl' : 'text-xl md:text-3xl'} align-middle mx-1 md:mx-4 ${pageBgImage ? '' : 'text-wedding-gold/90'} my-1 md:my-2 lowercase italic tracking-normal normal-case ${pageBgImage ? 'font-script-khant' : 'font-script'}`} style={pageBgImage ? { color: '#FFFFFF', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}>&</span>
+                            <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
                     <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-10 md:mt-24' : 'mt-4 md:mt-12'}`}>
