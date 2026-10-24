@@ -532,6 +532,9 @@ const App: React.FC = () => {
   };
 
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
+  // Optional separate heading font — falls back to the body font (activeFont) when a couple
+  // hasn't set titleFonts, so every existing couple renders identically to before.
+  const activeTitleFont = data.titleFonts?.[lang] || activeFont;
   const theme = data.theme || DEFAULT_DATA.theme;
   const pageBgImage = data.images?.pageBackground ? cacheBustedAsset(data.images.pageBackground) : '';
   // Shuffled once per data load (not on every render) so the gallery order is fresh per visit
@@ -560,7 +563,12 @@ const App: React.FC = () => {
     '--color-primary': hexToRgb(theme.primary),
     '--color-text': hexToRgb(theme.text),
     '--color-bg-tint': hexToRgb(theme.backgroundTint),
+    // Optional extras — default to today's hardcoded values when a couple hasn't set them,
+    // so this is purely additive and changes nothing for any existing couple.
+    '--color-card': hexToRgb(theme.cardBackground || '#fcfbf9'),
+    '--color-border': hexToRgb(theme.border || '#FFFFFF'),
     '--font-main': activeFont ? activeFont.replace(/"/g, '') : 'serif',
+    '--font-title': activeTitleFont ? activeTitleFont.replace(/"/g, '') : 'serif',
   } as React.CSSProperties;
 
   // Preload the page-background artwork as early as possible (while the envelope is still
@@ -688,7 +696,7 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center relative z-10 w-full px-4">
                     <p className="text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2">{t.saveTheDate}</p>
                     
-                    <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} mb-2 md:mb-4 ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+                    <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} mb-2 md:mb-4 ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
                         style={pageBgImage ? { color: '#FFFFFF', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}
                     >
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
@@ -734,7 +742,7 @@ const App: React.FC = () => {
                   <div className="mb-12 flex flex-col items-center">
                       <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
                       {!hasFamilyIntro && <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>}
-                      <h2 className="text-3xl md:text-4xl font-serif text-wedding-text">{hasFamilyIntro ? familyIntroTitle : t.invitation}</h2>
+                      <h2 className="text-3xl md:text-4xl font-title text-wedding-text">{hasFamilyIntro ? familyIntroTitle : t.invitation}</h2>
                   </div>
                   {hasFamilyIntro && (
                     <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif mb-10">{familyIntroBody}</p>
@@ -752,13 +760,13 @@ const App: React.FC = () => {
                     
                     {/* Groom */}
                     <div className="relative group text-center w-full max-w-xs">
-                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
+                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-wedding-border'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
                                 <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100 cursor-pointer" onError={handleImageError} onClick={() => setLightboxImage(cacheBustedAsset(data.images.groom))} />
                              </div>
                         </div>
                         <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.groomName[lang])} font-serif ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.groomName[lang])} font-title ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Groom</p>
                         </div>
                     </div>
@@ -767,13 +775,13 @@ const App: React.FC = () => {
 
                     {/* Bride */}
                     <div className="relative group text-center w-full max-w-xs">
-                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
+                        <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-wedding-border'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
                                 <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100 cursor-pointer" onError={handleImageError} onClick={() => setLightboxImage(cacheBustedAsset(data.images.bride))} />
                              </div>
                         </div>
                          <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.brideName[lang])} font-serif ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.brideName[lang])} font-title ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Bride</p>
                         </div>
                     </div>
@@ -791,7 +799,7 @@ const App: React.FC = () => {
               <section ref={scheduleRef} className="mb-24 px-6 md:px-12">
                 <div className={pageBgImage ? `${cardClass} p-8 md:p-12` : ''}>
                   <div className="text-center mb-16">
-                       <h2 className="text-3xl font-serif text-wedding-text">{t.schedule}</h2>
+                       <h2 className="text-3xl font-title text-wedding-text">{t.schedule}</h2>
                        <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                   </div>
                   <div className="relative border-l border-wedding-gold/20 ml-6 md:ml-1/2 space-y-16 pl-10 md:pl-0">
@@ -810,7 +818,7 @@ const App: React.FC = () => {
             {data.dressCode?.show && data.dressCode.colors && data.dressCode.colors.length > 0 && (
               <section className="mb-24 px-6 md:px-12 text-center">
                 <div className="text-center mb-10">
-                  <h2 className="text-3xl font-serif text-wedding-text">{t.dressCode}</h2>
+                  <h2 className="text-3xl font-title text-wedding-text">{t.dressCode}</h2>
                   <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                 </div>
                 {data.dressCode.note?.[lang] && (
@@ -829,11 +837,11 @@ const App: React.FC = () => {
 
             <section ref={accessRef} className="mb-24 px-6 md:px-12">
                <div className="text-center mb-16">
-                     <h2 className={`text-3xl font-serif ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.access}</h2>
+                     <h2 className={`text-3xl font-title ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.access}</h2>
                      <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                 </div>
-               <div className={`p-8 md:p-12 text-center ${pageBgImage ? cardClass.replace('mx-4 md:mx-10', '') : 'bg-[#fcfbf9] rounded-sm border border-gray-100'}`}>
-                    <h3 className="text-2xl font-serif font-bold mb-4 text-gray-800">{data.location.name[lang]}</h3>
+               <div className={`p-8 md:p-12 text-center ${pageBgImage ? cardClass.replace('mx-4 md:mx-10', '') : 'bg-wedding-card rounded-sm border border-gray-100'}`}>
+                    <h3 className="text-2xl font-title font-bold mb-4 text-gray-800">{data.location.name[lang]}</h3>
                     <p className="text-gray-500 mb-8 font-light">{data.location.address[lang]}</p>
                     <div className="h-64 md:h-80 w-full bg-gray-200 mb-8 grayscale hover:grayscale-0 transition-all duration-700">
                          <iframe ref={mapFrameRef} src={data.location.mapUrl} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
@@ -855,7 +863,7 @@ const App: React.FC = () => {
             {(data.showGallery && data.gallery && data.gallery.length > 0) && (
                 <section ref={galleryRef} className={pageBgImage ? 'mb-24' : 'mb-24 px-4'}>
                     <div className="text-center mb-12 px-4">
-                        <h2 className={`text-3xl font-serif ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.gallery}</h2>
+                        <h2 className={`text-3xl font-title ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.gallery}</h2>
                         <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                     </div>
                     {pageBgImage ? (
@@ -888,7 +896,7 @@ const App: React.FC = () => {
                <section className={`mb-24 px-6 md:px-12 py-20 ${pageBgImage ? '' : 'bg-[#faf9f6]'}`}>
                  <div className={pageBgImage ? `bg-[#f8f4ea] rounded-2xl shadow-2xl border-2 border-wedding-gold mx-4 md:mx-10 p-8 md:p-14` : ''}>
                  <div className="text-center mb-12">
-                        <h2 className="text-3xl font-serif text-wedding-text">{t.faq}</h2>
+                        <h2 className="text-3xl font-title text-wedding-text">{t.faq}</h2>
                         <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                  </div>
                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-12 max-w-3xl mx-auto">

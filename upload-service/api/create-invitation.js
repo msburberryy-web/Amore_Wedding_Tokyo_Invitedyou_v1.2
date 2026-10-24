@@ -15,6 +15,13 @@ const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 const URL_RE = /^https?:\/\/\S+$/;
 const SCHEDULE_ICONS = new Set(['ceremony', 'reception', 'party', 'toast', 'meal', 'camera', 'end']);
 const FAQ_ICONS = new Set(['users', 'shirt', 'clock', 'map', 'utensils', 'calendar', 'gift', 'info', 'baby']);
+// Mirrors FONT_OPTIONS in types.ts — only these exact values may be written into fonts/titleFonts,
+// so a submission can't inject an arbitrary font-family value.
+const ALLOWED_FONTS = {
+  en: new Set(['"Cormorant Garamond"', '"Playfair Display"', '"Montserrat"']),
+  ja: new Set(['"Noto Sans JP"', '"Shippori Mincho"', '"Zen Maru Gothic"']),
+  my: new Set(['"Padauk"', '"Noto Serif Myanmar"', '"Noto Sans Myanmar"'])
+};
 
 function clean(value, max) {
   return (typeof value === 'string' ? value : '').trim().slice(0, max);
@@ -51,6 +58,16 @@ function cleanColors(input) {
 function cleanGalleryUrls(input) {
   if (!Array.isArray(input)) return [];
   return input.slice(0, 20).map(u => cleanUrl(u, 1000)).filter(Boolean);
+}
+
+function cleanHex(value) {
+  const v = clean(value, 10);
+  return HEX_RE.test(v) ? v : '';
+}
+
+function cleanFont(value, lang) {
+  const v = clean(value, 60);
+  return ALLOWED_FONTS[lang]?.has(v) ? v : '';
 }
 
 async function getFileJson(path) {
@@ -97,6 +114,20 @@ export default async function handler(req, res) {
   const bgUrl               = cleanUrl(body.bgUrl, 1000);
   const galleryUrls         = cleanGalleryUrls(body.galleryUrls);
   const musicUrl            = cleanUrl(body.musicUrl, 1000);
+  const theme               = body.theme || {};
+  const colorPrimary        = cleanHex(theme.primary);
+  const colorText           = cleanHex(theme.text);
+  const colorBgTint         = cleanHex(theme.backgroundTint);
+  const colorCard           = cleanHex(theme.cardBackground);
+  const colorBorder         = cleanHex(theme.border);
+  const fonts               = body.fonts || {};
+  const fontEn              = cleanFont(fonts.en, 'en');
+  const fontJa              = cleanFont(fonts.ja, 'ja');
+  const fontMy              = cleanFont(fonts.my, 'my');
+  const titleFonts          = body.titleFonts || {};
+  const titleFontEn         = cleanFont(titleFonts.en, 'en');
+  const titleFontJa         = cleanFont(titleFonts.ja, 'ja');
+  const titleFontMy         = cleanFont(titleFonts.my, 'my');
 
   if (!templateId || !slug || !groomNameEn || !brideNameEn || !date) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -154,7 +185,26 @@ export default async function handler(req, res) {
         groom: groomUrl || templateJson.images.groom,
         bride: brideUrl || templateJson.images.bride,
         pageBackground: bgUrl || templateJson.images.pageBackground
-      }
+      },
+      theme: {
+        primary: colorPrimary || templateJson.theme.primary,
+        text: colorText || templateJson.theme.text,
+        backgroundTint: colorBgTint || templateJson.theme.backgroundTint,
+        ...(colorCard ? { cardBackground: colorCard } : {}),
+        ...(colorBorder ? { border: colorBorder } : {})
+      },
+      fonts: {
+        en: fontEn || templateJson.fonts.en,
+        ja: fontJa || templateJson.fonts.ja,
+        my: fontMy || templateJson.fonts.my
+      },
+      ...((titleFontEn || titleFontJa || titleFontMy) ? {
+        titleFonts: {
+          en: titleFontEn || fontEn || templateJson.fonts.en,
+          ja: titleFontJa || fontJa || templateJson.fonts.ja,
+          my: titleFontMy || fontMy || templateJson.fonts.my
+        }
+      } : {})
     };
 
     // 4. Create a new branch off main

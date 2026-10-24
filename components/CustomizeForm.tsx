@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Language } from '../types';
+import { Language, FONT_OPTIONS } from '../types';
 import LanguageSwitch from './LanguageSwitch';
 
 const API_BASE = (import.meta.env.VITE_UPLOAD_API_URL || '').replace(/\/$/, '');
@@ -27,6 +27,14 @@ const T = {
     sectionFaq: 'FAQ',
     sectionDress: 'Dress Code',
     sectionMedia: 'Photos & Music (by URL)',
+    sectionDesign: 'Colors & Fonts',
+    colorPrimary: 'Accent color (gold by default)',
+    colorText: 'Main text color',
+    colorBgTint: 'Page tint color',
+    colorCard: 'Block/card background color',
+    colorBorder: 'Photo border color',
+    fontBody: 'Paragraph font',
+    fontTitle: 'Title font (optional — leave as paragraph font if unsure)',
     groomName: "Groom's name",
     brideName: "Bride's name",
     date: 'Wedding date',
@@ -74,6 +82,14 @@ const T = {
     sectionFaq: 'Q&A',
     sectionDress: 'ドレスコード',
     sectionMedia: '写真・音楽（URL）',
+    sectionDesign: '配色・フォント',
+    colorPrimary: 'アクセントカラー（デフォルトはゴールド）',
+    colorText: 'メインテキストの色',
+    colorBgTint: 'ページの色合い',
+    colorCard: 'ブロック／カードの背景色',
+    colorBorder: '写真の枠線の色',
+    fontBody: '本文のフォント',
+    fontTitle: 'タイトルのフォント（任意・わからない場合は本文と同じでOK）',
     groomName: '新郎のお名前',
     brideName: '新婦のお名前',
     date: '挙式日',
@@ -121,6 +137,14 @@ const T = {
     sectionFaq: 'မေးခွန်းများ',
     sectionDress: 'ဝတ်စားဆင်ယင်မှု',
     sectionMedia: 'ဓာတ်ပုံ နှင့် သီချင်း (URL)',
+    sectionDesign: 'အရောင် နှင့် Font',
+    colorPrimary: 'အဓိက အရောင် (ပုံသေမှာ gold)',
+    colorText: 'စာသား အရောင်',
+    colorBgTint: 'စာမျက်နှာ အရောင်',
+    colorCard: 'Block/Card နောက်ခံ အရောင်',
+    colorBorder: 'ဓာတ်ပုံ ဘောင် အရောင်',
+    fontBody: 'စာကိုယ် Font',
+    fontTitle: 'ခေါင်းစီး Font (ရွေးချယ်နိုင်သည် — မသေချာပါက စာကိုယ်နှင့်တူအောင်ထားပါ)',
     groomName: 'မင်္ဂလာဖူးသူ အမည်',
     brideName: 'မင်္ဂလာဆောင်သူ အမည်',
     date: 'မင်္ဂလာပွဲ ရက်စွဲ',
@@ -209,6 +233,19 @@ const CustomizeForm: React.FC<Props> = ({ templateId, lang, setLang }) => {
   const [galleryUrlsText, setGalleryUrlsText] = useState('');
   const [musicUrl, setMusicUrl] = useState('');
 
+  // Colors & fonts (all optional — blank means "use the template's defaults")
+  const [colorPrimary, setColorPrimary] = useState('');
+  const [colorText, setColorText] = useState('');
+  const [colorBgTint, setColorBgTint] = useState('');
+  const [colorCard, setColorCard] = useState('');
+  const [colorBorder, setColorBorder] = useState('');
+  const [fontEn, setFontEn] = useState('');
+  const [fontJa, setFontJa] = useState('');
+  const [fontMy, setFontMy] = useState('');
+  const [titleFontEn, setTitleFontEn] = useState('');
+  const [titleFontJa, setTitleFontJa] = useState('');
+  const [titleFontMy, setTitleFontMy] = useState('');
+
   const [hp, setHp] = useState(''); // honeypot
   const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -267,6 +304,9 @@ const CustomizeForm: React.FC<Props> = ({ templateId, lang, setLang }) => {
           bgUrl,
           galleryUrls: galleryUrlsText.split('\n').map(s => s.trim()).filter(Boolean),
           musicUrl,
+          theme: { primary: colorPrimary, text: colorText, backgroundTint: colorBgTint, cardBackground: colorCard, border: colorBorder },
+          fonts: { en: fontEn, ja: fontJa, my: fontMy },
+          titleFonts: { en: titleFontEn, ja: titleFontJa, my: titleFontMy },
           hp
         })
       });
@@ -454,6 +494,54 @@ const CustomizeForm: React.FC<Props> = ({ templateId, lang, setLang }) => {
                 </Field>
               </Section>
 
+              <Section title={t.sectionDesign}>
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorField label={t.colorPrimary} value={colorPrimary} onChange={setColorPrimary} />
+                  <ColorField label={t.colorText} value={colorText} onChange={setColorText} />
+                  <ColorField label={t.colorBgTint} value={colorBgTint} onChange={setColorBgTint} />
+                  <ColorField label={t.colorCard} value={colorCard} onChange={setColorCard} />
+                  <ColorField label={t.colorBorder} value={colorBorder} onChange={setColorBorder} />
+                </div>
+
+                <Field label={`${t.fontBody} — EN`} badge={t.optional}>
+                  <select className="input" value={fontEn} onChange={e => setFontEn(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.en.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label={`${t.fontBody} — 日本語`} badge={t.optional}>
+                  <select className="input" value={fontJa} onChange={e => setFontJa(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.ja.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label={`${t.fontBody} — မြန်မာ`} badge={t.optional}>
+                  <select className="input" value={fontMy} onChange={e => setFontMy(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.my.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+
+                <Field label={`${t.fontTitle} — EN`} badge={t.optional}>
+                  <select className="input" value={titleFontEn} onChange={e => setTitleFontEn(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.en.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label={`${t.fontTitle} — 日本語`} badge={t.optional}>
+                  <select className="input" value={titleFontJa} onChange={e => setTitleFontJa(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.ja.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+                <Field label={`${t.fontTitle} — မြန်မာ`} badge={t.optional}>
+                  <select className="input" value={titleFontMy} onChange={e => setTitleFontMy(e.target.value)}>
+                    <option value="">—</option>
+                    {FONT_OPTIONS.my.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </Field>
+              </Section>
+
               {/* Honeypot — hidden from real users, bots that fill it get silently ignored server-side */}
               <input
                 type="text"
@@ -488,6 +576,16 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
     <h3 className="text-sm font-semibold text-[#C5A059] uppercase tracking-wide">{title}</h3>
     {children}
+  </div>
+);
+
+const ColorField: React.FC<{ label: string; value: string; onChange: (v: string) => void }> = ({ label, value, onChange }) => (
+  <div>
+    <span className="text-xs text-gray-500 block mb-1">{label}</span>
+    <div className="flex items-center gap-2">
+      <input type="color" value={value || '#C5A059'} onChange={e => onChange(e.target.value)} />
+      {value && <button type="button" onClick={() => onChange('')} className="text-xs text-gray-400 hover:text-red-500">✕</button>}
+    </div>
   </div>
 );
 
