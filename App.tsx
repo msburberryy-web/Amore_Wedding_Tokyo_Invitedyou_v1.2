@@ -15,11 +15,16 @@ const AdminPanel = React.lazy(() => import('./components/AdminPanel'));
 const showAdminPanel = import.meta.env.VITE_ENABLE_ADMIN === 'true' || import.meta.env.DEV;
 
 const PhotoUpload = React.lazy(() => import('./components/PhotoUpload'));
+const Catalog = React.lazy(() => import('./components/Catalog'));
+const CustomizeForm = React.lazy(() => import('./components/CustomizeForm'));
 
 // Detect upload mode before rendering the main app
 const _urlParams = new URLSearchParams(window.location.search);
 const _isUploadMode = _urlParams.get('mode') === 'upload';
 const _uploadEvent  = _urlParams.get('event') || '';
+const _isCatalogMode = _urlParams.get('mode') === 'catalog';
+const _isCustomizeMode = _urlParams.get('mode') === 'customize';
+const _customizeTemplate = _urlParams.get('template') || '';
 
 const TRANSLATIONS = {
   en: {
@@ -141,6 +146,22 @@ const App: React.FC = () => {
     return (
       <Suspense fallback={<div className="min-h-screen bg-[#F5F0E6]" />}>
         <PhotoUpload event={_uploadEvent} lang={lang} setLang={setLang} />
+      </Suspense>
+    );
+  }
+
+  if (_isCatalogMode) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#F5F0E6]" />}>
+        <Catalog lang={lang} setLang={setLang} />
+      </Suspense>
+    );
+  }
+
+  if (_isCustomizeMode) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-[#F5F0E6]" />}>
+        <CustomizeForm templateId={_customizeTemplate} lang={lang} setLang={setLang} />
       </Suspense>
     );
   }
