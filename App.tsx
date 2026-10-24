@@ -689,15 +689,12 @@ const App: React.FC = () => {
             } : undefined}
           >
 
-            {/* Family Introduction Section (optional, per-couple traditional preamble) */}
-            {data.familyIntro?.show && data.familyIntro.text[lang] && (
-              <section className={`text-center pb-4 px-8 md:px-12 ${pageBgImage ? `pt-10 mt-8 mb-8 ${cardClass}` : 'pt-24 bg-white'}`}>
-                <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.familyIntro.text[lang]}</p>
-              </section>
-            )}
-
-            {/* Greeting Section */}
+            {/* Greeting Section — merged with the optional traditional family-introduction preamble
+                (shown above the Welcome heading, inside the same card) instead of a separate card. */}
             <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-12 mb-8 ${cardClass} shadow-2xl` : 'pt-24 pb-16 bg-white'}`}>
+              {data.familyIntro?.show && data.familyIntro.text[lang] && (
+                <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif mb-10 pb-10 border-b border-wedding-gold/20">{data.familyIntro.text[lang]}</p>
+              )}
               <div className="mb-12 flex flex-col items-center">
                   <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
                   <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>
