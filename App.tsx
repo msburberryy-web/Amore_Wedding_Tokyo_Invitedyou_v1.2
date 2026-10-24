@@ -5,7 +5,7 @@ import Countdown from './components/Countdown';
 import RsvpForm from './components/RsvpForm'; 
 import EnvelopeOverlay from './components/EnvelopeOverlay'; 
 import OnboardingGuide from './components/OnboardingGuide';
-import { MapPin, Clock, Volume2, VolumeX, ChevronDown, Camera } from 'lucide-react'; // Reduced imports for main bundle
+import { MapPin, Clock, Volume2, VolumeX, ChevronDown, Camera, X } from 'lucide-react'; // Reduced imports for main bundle
 
 // Lazy Load Admin Panel - This splits the code into a separate chunk!
 // It will NOT be loaded by guests on the live website.
@@ -178,6 +178,9 @@ const App: React.FC = () => {
   // Audio State
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Lightbox: tapping the groom/bride profile photos or any gallery photo enlarges it full-screen.
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   // Refs
   const scheduleRef = useRef<HTMLDivElement>(null);
@@ -584,6 +587,28 @@ const App: React.FC = () => {
       {/* Onboarding Guide for Guests */}
       {showGuide && <OnboardingGuide onComplete={handleGuideComplete} />}
 
+      {/* Lightbox: tapping a profile (groom/bride) or gallery photo enlarges it full-screen. */}
+      {lightboxImage && (
+        <div
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-black/90 p-4 cursor-zoom-out"
+          onClick={() => setLightboxImage(null)}
+        >
+          <button
+            onClick={() => setLightboxImage(null)}
+            className="absolute top-4 right-4 text-white/80 hover:text-white p-2 cursor-pointer"
+            aria-label="Close"
+          >
+            <X size={28} />
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Enlarged"
+            className="max-w-full max-h-full object-contain cursor-default"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {data.musicUrl && (
           <button
             onClick={toggleMusic}
@@ -681,7 +706,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={handleImageError} />
+                                <img src={cacheBustedAsset(data.images.groom)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100 cursor-pointer" onError={handleImageError} onClick={() => setLightboxImage(cacheBustedAsset(data.images.groom))} />
                              </div>
                         </div>
                         <div className="mt-6">
@@ -696,7 +721,7 @@ const App: React.FC = () => {
                     <div className="relative group text-center w-full max-w-xs">
                         <div className={`aspect-[3/4] overflow-hidden relative shadow-md p-2 ${pageBgImage ? 'bg-wedding-gold' : 'bg-white'}`}>
                              <div className="w-full h-full overflow-hidden relative bg-gray-100">
-                                <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100" onError={handleImageError} />
+                                <img src={cacheBustedAsset(data.images.bride)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-95 group-hover:opacity-100 cursor-pointer" onError={handleImageError} onClick={() => setLightboxImage(cacheBustedAsset(data.images.bride))} />
                              </div>
                         </div>
                          <div className="mt-6">
@@ -788,7 +813,7 @@ const App: React.FC = () => {
                     <div className="columns-2 md:columns-3 gap-3 space-y-3">
                         {data.gallery.map((img, idx) => (
                             <div key={idx} className="break-inside-avoid overflow-hidden rounded-sm shadow-sm">
-                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300" onError={(e) => handleImageError(e, '.break-inside-avoid')} />
+                                <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300 cursor-pointer" onError={(e) => handleImageError(e, '.break-inside-avoid')} onClick={() => setLightboxImage(cacheBustedAsset(img))} />
                             </div>
                         ))}
                     </div>
