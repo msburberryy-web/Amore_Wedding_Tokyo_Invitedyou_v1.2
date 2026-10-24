@@ -806,7 +806,7 @@ const App: React.FC = () => {
 
             <section ref={accessRef} className="mb-24 px-6 md:px-12">
                <div className="text-center mb-16">
-                     <h2 className="text-3xl font-serif text-wedding-text">{t.access}</h2>
+                     <h2 className={`text-3xl font-serif ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.access}</h2>
                      <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                 </div>
                <div className={`p-8 md:p-12 text-center ${pageBgImage ? cardClass.replace('mx-4 md:mx-10', '') : 'bg-[#fcfbf9] rounded-sm border border-gray-100'}`}>
