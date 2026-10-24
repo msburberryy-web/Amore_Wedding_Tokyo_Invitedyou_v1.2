@@ -675,7 +675,7 @@ const App: React.FC = () => {
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
-                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[calc(6rem+1cm)] md:mt-[calc(10rem+1cm)]' : 'mt-4 md:mt-12'}`}>
+                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[calc(6rem+2cm)] md:mt-[calc(10rem+2cm)]' : 'mt-4 md:mt-12'}`}>
                         <p className="text-base md:text-3xl font-serif tracking-[0.2em] drop-shadow-md text-white">{formattedDate}</p>
                     </div>
                 </div>
@@ -718,7 +718,9 @@ const App: React.FC = () => {
                   {hasFamilyIntro && (
                     <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif mb-10">{familyIntroBody}</p>
                   )}
-                  <p className="whitespace-pre-wrap leading-loose text-gray-600 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.message[lang]}</p>
+                  {data.message[lang] && (
+                    <p className="whitespace-pre-wrap leading-loose text-gray-600 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.message[lang]}</p>
+                  )}
                 </section>
               );
             })()}
