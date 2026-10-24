@@ -799,7 +799,7 @@ const App: React.FC = () => {
                       <div key={idx} className="relative md:flex items-center justify-between group">
                         <div className={`absolute -left-[45px] md:left-1/2 md:-ml-[5px] w-[10px] h-[10px] bg-wedding-gold rounded-full z-10 ring-4 ${pageBgImage ? 'ring-[#f8f4ea]' : 'ring-white'}`} />
                         <div className="md:w-[45%] md:text-right mb-2 md:mb-0 md:pr-12"><span className="text-3xl font-serif text-wedding-text font-light">{item.time}</span></div>
-                        <div className="md:w-[45%] md:pl-12"><h3 className="text-lg text-gray-700 font-medium tracking-wide">{item.title[lang]}</h3></div>
+                        <div className="md:w-[45%] md:pl-12"><h3 className="text-lg text-gray-700 font-medium tracking-wide">{item.title[lang] || item.title.en}</h3></div>
                       </div>
                     ))}
                   </div>
@@ -896,9 +896,9 @@ const App: React.FC = () => {
                      <div key={idx} className={`pb-8 ${pageBgImage ? 'border-b border-[#D1A054]/25' : 'border-b border-gray-200'}`}>
                         <h3 className={`text-md font-bold mb-4 flex items-start gap-3 ${pageBgImage ? 'text-[#2A4B8D]' : 'text-gray-800'}`}>
                              <span className={`text-sm font-serif italic ${pageBgImage ? 'text-[#D1A054]' : 'text-wedding-gold'}`}>Q.</span>
-                             {item.question[lang]}
+                             {item.question[lang] || item.question.en}
                         </h3>
-                        <p className={`font-light text-sm leading-relaxed pl-7 ${pageBgImage ? 'text-[#8A6D3B]' : 'text-gray-500'}`}>{item.answer[lang]}</p>
+                        <p className={`font-light text-sm leading-relaxed pl-7 ${pageBgImage ? 'text-[#8A6D3B]' : 'text-gray-500'}`}>{item.answer[lang] || item.answer.en}</p>
                      </div>
                    ))}
                  </div>

@@ -11,9 +11,46 @@ const CORS = {
 };
 
 const SLUG_RE = /^[a-z0-9]{2,20}\.[a-z0-9]{2,20}$/;
+const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const URL_RE = /^https?:\/\/\S+$/;
+const SCHEDULE_ICONS = new Set(['ceremony', 'reception', 'party', 'toast', 'meal', 'camera', 'end']);
+const FAQ_ICONS = new Set(['users', 'shirt', 'clock', 'map', 'utensils', 'calendar', 'gift', 'info', 'baby']);
 
 function clean(value, max) {
   return (typeof value === 'string' ? value : '').trim().slice(0, max);
+}
+
+function cleanUrl(value, max) {
+  const v = clean(value, max);
+  return URL_RE.test(v) ? v : '';
+}
+
+function cleanSchedule(input) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 20).map(row => ({
+    time: clean(row?.time, 20),
+    titleEn: clean(row?.titleEn, 120),
+    icon: SCHEDULE_ICONS.has(row?.icon) ? row.icon : 'reception'
+  })).filter(r => r.time && r.titleEn);
+}
+
+function cleanFaq(input) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 20).map(row => ({
+    questionEn: clean(row?.questionEn, 300),
+    answerEn: clean(row?.answerEn, 3000),
+    icon: FAQ_ICONS.has(row?.icon) ? row.icon : 'info'
+  })).filter(r => r.questionEn && r.answerEn);
+}
+
+function cleanColors(input) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 8).map(c => clean(c, 10)).filter(c => HEX_RE.test(c));
+}
+
+function cleanGalleryUrls(input) {
+  if (!Array.isArray(input)) return [];
+  return input.slice(0, 20).map(u => cleanUrl(u, 1000)).filter(Boolean);
 }
 
 async function getFileJson(path) {
@@ -46,7 +83,20 @@ export default async function handler(req, res) {
   const locationAddressEn   = clean(body.locationAddressEn, 2000);
   const mapUrl              = clean(body.mapUrl, 1000);
   const messageEn           = clean(body.messageEn, 4000);
+  const messageJa           = clean(body.messageJa, 4000);
+  const messageMy           = clean(body.messageMy, 4000);
   const contactEmail        = clean(body.contactEmail, 200);
+  const schedule            = cleanSchedule(body.schedule);
+  const faq                 = cleanFaq(body.faq);
+  const dressShow           = !!(body.dressCode && body.dressCode.show);
+  const dressColors         = cleanColors(body.dressCode && body.dressCode.colors);
+  const dressNote           = clean(body.dressCode && body.dressCode.note, 300);
+  const heroUrl             = cleanUrl(body.heroUrl, 1000);
+  const groomUrl            = cleanUrl(body.groomUrl, 1000);
+  const brideUrl            = cleanUrl(body.brideUrl, 1000);
+  const bgUrl               = cleanUrl(body.bgUrl, 1000);
+  const galleryUrls         = cleanGalleryUrls(body.galleryUrls);
+  const musicUrl            = cleanUrl(body.musicUrl, 1000);
 
   if (!templateId || !slug || !groomNameEn || !brideNameEn || !date) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -83,7 +133,28 @@ export default async function handler(req, res) {
         address: { ...templateJson.location.address, en: locationAddressEn || templateJson.location.address.en },
         mapUrl: mapUrl || templateJson.location.mapUrl
       },
-      message: { ...templateJson.message, en: messageEn || templateJson.message.en }
+      message: {
+        en: messageEn || templateJson.message.en,
+        ja: messageJa || templateJson.message.ja,
+        my: messageMy || templateJson.message.my
+      },
+      schedule: schedule.length > 0
+        ? schedule.map(row => ({ time: row.time, title: { en: row.titleEn, ja: '', my: '' }, icon: row.icon }))
+        : templateJson.schedule,
+      faq: faq.length > 0
+        ? faq.map(row => ({ question: { en: row.questionEn, ja: '', my: '' }, answer: { en: row.answerEn, ja: '', my: '' }, icon: row.icon }))
+        : templateJson.faq,
+      dressCode: dressShow
+        ? { show: true, colors: dressColors.length > 0 ? dressColors : ['#C5A059', '#4A4A4A'], note: { en: dressNote, ja: '', my: '' } }
+        : (templateJson.dressCode || { show: false, colors: [], note: { en: '', ja: '', my: '' } }),
+      gallery: galleryUrls.length > 0 ? galleryUrls : templateJson.gallery,
+      musicUrl: musicUrl || templateJson.musicUrl,
+      images: {
+        hero: heroUrl || templateJson.images.hero,
+        groom: groomUrl || templateJson.images.groom,
+        bride: brideUrl || templateJson.images.bride,
+        pageBackground: bgUrl || templateJson.images.pageBackground
+      }
     };
 
     // 4. Create a new branch off main
