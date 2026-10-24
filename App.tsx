@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { WeddingData, Language, DEFAULT_DATA } from './types';
 import LanguageSwitch from './components/LanguageSwitch';
 import Countdown from './components/Countdown';
@@ -513,6 +513,16 @@ const App: React.FC = () => {
   const activeFont = data.fonts?.[lang] || DEFAULT_DATA.fonts[lang];
   const theme = data.theme || DEFAULT_DATA.theme;
   const pageBgImage = data.images?.pageBackground ? cacheBustedAsset(data.images.pageBackground) : '';
+  // Shuffled once per data load (not on every render) so the gallery order is fresh per visit
+  // without re-shuffling mid-interaction (e.g. while the lightbox is open).
+  const shuffledGallery = useMemo(() => {
+    const arr = [...(data.gallery || [])];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, [data.gallery]);
   // Opt-in "night sky" treatment for the sections that would otherwise stay flat white/off-white
   // even when a couple has a painterly pageBackground — deep indigo with a soft gold starlight glow.
   const nightBandStyle: React.CSSProperties | undefined = pageBgImage ? {
@@ -690,18 +700,28 @@ const App: React.FC = () => {
           >
 
             {/* Greeting Section — merged with the optional traditional family-introduction preamble
-                (shown above the Welcome heading, inside the same card) instead of a separate card. */}
-            <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-12 mb-8 ${cardClass} shadow-2xl` : 'pt-24 pb-16 bg-white'}`}>
-              {data.familyIntro?.show && data.familyIntro.text[lang] && (
-                <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif mb-10 pb-10 border-b border-wedding-gold/20">{data.familyIntro.text[lang]}</p>
-              )}
-              <div className="mb-12 flex flex-col items-center">
-                  <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
-                  <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>
-                  <h2 className="text-3xl md:text-4xl font-serif text-wedding-text">{t.invitation}</h2>
-              </div>
-              <p className="whitespace-pre-wrap leading-loose text-gray-600 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.message[lang]}</p>
-            </section>
+                into one card with one title. When familyIntro is showing, its own first line becomes
+                the card's title (styled like the old "Welcome" heading) and the plain "Welcome"
+                label/heading is dropped entirely, instead of stacking two separate title treatments. */}
+            {(() => {
+              const hasFamilyIntro = !!(data.familyIntro?.show && data.familyIntro.text[lang]);
+              const familyIntroLines = hasFamilyIntro ? data.familyIntro!.text[lang].split('\n') : [];
+              const familyIntroTitle = familyIntroLines[0] || '';
+              const familyIntroBody = familyIntroLines.slice(1).join('\n').replace(/^\n+/, '');
+              return (
+                <section className={`text-center px-8 md:px-12 ${pageBgImage ? `pt-10 pb-10 mt-12 mb-8 ${cardClass} shadow-2xl` : 'pt-24 pb-16 bg-white'}`}>
+                  <div className="mb-12 flex flex-col items-center">
+                      <div className="h-16 w-[1px] bg-wedding-gold mb-6"></div>
+                      {!hasFamilyIntro && <p className="text-wedding-gold text-xs tracking-[0.3em] uppercase mb-4">Welcome</p>}
+                      <h2 className="text-3xl md:text-4xl font-serif text-wedding-text">{hasFamilyIntro ? familyIntroTitle : t.invitation}</h2>
+                  </div>
+                  {hasFamilyIntro && (
+                    <p className="whitespace-pre-line leading-loose text-gray-700 font-light text-md md:text-lg max-w-2xl mx-auto font-serif mb-10">{familyIntroBody}</p>
+                  )}
+                  <p className="whitespace-pre-wrap leading-loose text-gray-600 font-light text-md md:text-lg max-w-2xl mx-auto font-serif">{data.message[lang]}</p>
+                </section>
+              );
+            })()}
 
              {/* Profile Section - Refined for Piary Look (Cleaner, no rotation on mobile) */}
              <section className={`py-20 px-6 overflow-hidden ${pageBgImage ? '' : 'bg-[#faf9f6]'}`}>
@@ -810,18 +830,34 @@ const App: React.FC = () => {
             </section>
 
             {(data.showGallery && data.gallery && data.gallery.length > 0) && (
-                <section ref={galleryRef} className="mb-24 px-4">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-serif text-wedding-text">{t.gallery}</h2>
+                <section ref={galleryRef} className={pageBgImage ? 'mb-24' : 'mb-24 px-4'}>
+                    <div className="text-center mb-12 px-4">
+                        <h2 className={`text-3xl font-serif ${pageBgImage ? nightBandTextClass : 'text-wedding-text'}`}>{t.gallery}</h2>
                         <div className="w-10 h-[1px] bg-wedding-gold mx-auto mt-6"></div>
                     </div>
-                    <div className="columns-2 md:columns-3 gap-3 space-y-3">
+                    {pageBgImage ? (
+                      // "Moving pictures" — a continuously auto-scrolling strip instead of a static grid,
+                      // shuffled per visit (shuffledGallery). The image list is duplicated once so the
+                      // loop point (translateX -50%) is seamless; hovering pauses it so a photo can be
+                      // read/clicked without it sliding away mid-interaction.
+                      <div className="overflow-hidden">
+                        <div className="flex gap-3 w-max animate-gallery-scroll">
+                          {[...shuffledGallery, ...shuffledGallery].map((img, idx) => (
+                            <div key={idx} className="gallery-marquee-item flex-shrink-0 w-40 sm:w-52 md:w-64 aspect-[3/4] overflow-hidden rounded-sm shadow-lg">
+                              <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-full object-cover hover:opacity-90 transition-opacity duration-300 cursor-pointer" onError={(e) => handleImageError(e, '.gallery-marquee-item')} onClick={() => setLightboxImage(cacheBustedAsset(img))} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                    <div className="columns-2 md:columns-3 gap-3 space-y-3 px-4">
                         {data.gallery.map((img, idx) => (
                             <div key={idx} className="break-inside-avoid overflow-hidden rounded-sm shadow-sm">
                                 <img src={cacheBustedAsset(img)} alt="Gallery" className="w-full h-auto object-cover hover:opacity-90 transition-opacity duration-300 cursor-pointer" onError={(e) => handleImageError(e, '.break-inside-avoid')} onClick={() => setLightboxImage(cacheBustedAsset(img))} />
                             </div>
                         ))}
                     </div>
+                    )}
                 </section>
             )}
 

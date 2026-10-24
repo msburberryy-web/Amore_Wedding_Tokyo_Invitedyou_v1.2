@@ -76,6 +76,19 @@
         writing-mode: vertical-rl;
         text-orientation: upright;
       }
+      /* Continuously auto-scrolling gallery strip ("moving pictures") — used for khant_aye's
+         gallery only. The image list is rendered twice back-to-back so translateX(-50%) loops
+         seamlessly back to the start with no visible jump. */
+      @keyframes gallery-scroll {
+        from { transform: translateX(0); }
+        to { transform: translateX(-50%); }
+      }
+      .animate-gallery-scroll {
+        animation: gallery-scroll 50s linear infinite;
+      }
+      .animate-gallery-scroll:hover {
+        animation-play-state: paused;
+      }
     </style>
 <script type="importmap">
 {
