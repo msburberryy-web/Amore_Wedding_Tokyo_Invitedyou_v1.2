@@ -198,6 +198,12 @@ const App: React.FC = () => {
     return name.length > 15 ? 'text-lg' : name.length > 10 ? 'text-xl' : 'text-2xl';
   };
 
+  // Names are stored ALL CAPS (looks right with the default tracked serif style), but a script/
+  // calligraphy font reads as messy in all caps — it's drawn to join letters within a normal-case
+  // word. Used only where a couple's cover page switches to a script font.
+  const toTitleCase = (name: string) =>
+    name.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+
   // 1. Initialization & Data Loading
   useEffect(() => {
     // SECURITY: Control Admin Access based on Build Environment
@@ -651,12 +657,12 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center relative z-10 w-full px-4">
                     <p className="text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2">{t.saveTheDate}</p>
                     
-                    <h1 className={`${pageBgImage ? 'font-script text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em]'} mb-2 md:mb-4 drop-shadow-2xl ${pageBgImage ? '' : 'text-white'} flex flex-col md:flex-row flex-wrap justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+                    <h1 className={`${pageBgImage ? 'font-script-khant text-5xl sm:text-7xl md:text-9xl lg:text-[10rem] tracking-normal' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em]'} mb-2 md:mb-4 drop-shadow-2xl ${pageBgImage ? '' : 'text-white'} flex flex-col md:flex-row flex-wrap justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
                         style={pageBgImage ? { color: '#FFD700' } : undefined}
                     >
-                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{data.groomName[lang]}</span>
-                            <span className={`${pageBgImage ? 'text-2xl md:text-4xl' : 'text-xl md:text-3xl'} align-middle mx-2 md:mx-4 ${pageBgImage ? '' : 'text-wedding-gold/90'} my-1 md:my-2 lowercase italic tracking-normal normal-case font-script`} style={pageBgImage ? { color: '#FFD700' } : undefined}>&</span>
-                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{data.brideName[lang]}</span>
+                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
+                            <span className={`${pageBgImage ? 'text-3xl md:text-5xl' : 'text-xl md:text-3xl'} align-middle mx-2 md:mx-4 ${pageBgImage ? '' : 'text-wedding-gold/90'} my-1 md:my-2 lowercase italic tracking-normal normal-case ${pageBgImage ? 'font-script-khant' : 'font-script'}`} style={pageBgImage ? { color: '#FFD700' } : undefined}>&</span>
+                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
                     <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-10 md:mt-24' : 'mt-4 md:mt-12'}`}>
@@ -874,15 +880,15 @@ const App: React.FC = () => {
             </div>
           </footer>
 
-          <div id="mobile-nav" className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 z-40 md:hidden pb-safe">
-               <div className="flex justify-around items-center h-16">
-                    <button onClick={() => scrollToSection(scheduleRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><Clock size={18} /><span className="text-[10px] mt-1">{t.schedule}</span></button>
-                     <button onClick={() => scrollToSection(accessRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><MapPin size={18} /><span className="text-[10px] mt-1">{t.access}</span></button>
+          <div id="mobile-nav" className="fixed bottom-2 left-2 right-2 bg-white/60 backdrop-blur-xl border border-white/50 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.12)] z-40 md:hidden">
+               <div className="flex justify-around items-center h-12">
+                    <button onClick={() => scrollToSection(scheduleRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><Clock size={15} /><span className="text-[9px] mt-0.5">{t.schedule}</span></button>
+                     <button onClick={() => scrollToSection(accessRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><MapPin size={15} /><span className="text-[9px] mt-0.5">{t.access}</span></button>
                     {isRsvpClosed
-                      ? <div className="flex flex-col items-center justify-center w-full h-full bg-gray-200 text-gray-400"><span className="text-[10px] mt-1 font-bold">{t.rsvp}</span></div>
-                      : <button onClick={() => setView('rsvp')} className="flex flex-col items-center justify-center w-full h-full bg-wedding-gold text-white"><span className="text-[10px] mt-1 font-bold">{t.rsvp}</span></button>
+                      ? <div className="flex flex-col items-center justify-center w-full h-full rounded-xl bg-gray-200/70 text-gray-400 my-1.5 mx-0.5"><span className="text-[9px] font-bold">{t.rsvp}</span></div>
+                      : <button onClick={() => setView('rsvp')} className="flex flex-col items-center justify-center w-full h-full rounded-xl bg-wedding-gold/90 backdrop-blur-sm text-white my-1.5 mx-0.5"><span className="text-[9px] font-bold">{t.rsvp}</span></button>
                     }
-                     <button onClick={() => scrollToSection(galleryRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><Camera size={18} /><span className="text-[10px] mt-1">{t.gallery}</span></button>
+                     <button onClick={() => scrollToSection(galleryRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><Camera size={15} /><span className="text-[9px] mt-0.5">{t.gallery}</span></button>
                </div>
           </div>
         </>
