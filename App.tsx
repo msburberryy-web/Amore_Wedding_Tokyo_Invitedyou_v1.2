@@ -651,13 +651,15 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center relative z-10 w-full px-4">
                     <p className="text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2">{t.saveTheDate}</p>
                     
-                    <h1 className="font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl mb-2 md:mb-4 drop-shadow-2xl text-white flex flex-col md:flex-row flex-wrap justify-center items-center tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] font-light max-w-[95%] md:max-w-[85%] leading-tight">
-                            <span className="break-words text-center px-2 italic">{data.groomName[lang]}</span>
-                            <span className="text-xl md:text-3xl align-middle mx-2 md:mx-4 text-wedding-gold/90 my-1 md:my-2 lowercase italic tracking-normal normal-case font-script">&</span>
-                            <span className="break-words text-center px-2 italic">{data.brideName[lang]}</span>
+                    <h1 className={`${pageBgImage ? 'font-script text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal' : 'font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em]'} mb-2 md:mb-4 drop-shadow-2xl ${pageBgImage ? '' : 'text-white'} flex flex-col md:flex-row flex-wrap justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+                        style={pageBgImage ? { color: '#FFD700' } : undefined}
+                    >
+                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{data.groomName[lang]}</span>
+                            <span className={`${pageBgImage ? 'text-2xl md:text-4xl' : 'text-xl md:text-3xl'} align-middle mx-2 md:mx-4 ${pageBgImage ? '' : 'text-wedding-gold/90'} my-1 md:my-2 lowercase italic tracking-normal normal-case font-script`} style={pageBgImage ? { color: '#FFD700' } : undefined}>&</span>
+                            <span className={`break-words text-center px-2 ${pageBgImage ? '' : 'italic'}`}>{data.brideName[lang]}</span>
                         </h1>
 
-                    <div className="inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm mt-4 md:mt-12 shadow-lg">
+                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-10 md:mt-24' : 'mt-4 md:mt-12'}`}>
                         <p className="text-base md:text-3xl font-serif tracking-[0.2em] drop-shadow-md text-white">{formattedDate}</p>
                     </div>
                 </div>
