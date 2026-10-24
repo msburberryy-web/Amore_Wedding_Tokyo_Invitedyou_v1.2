@@ -17,7 +17,7 @@ Anyone with this link can browse templates and submit a customized invitation. N
 ## How it works
 
 1. Couple opens the catalog link, picks a design (currently: **Starry Night**, based on the Khant & Aye template).
-2. They fill in groom/bride name, wedding date, and optionally venue/RSVP deadline/welcome message, plus a link ID like `khant.aye`.
+2. They fill in groom/bride name, wedding date, and a link ID like `khant.aye`, plus anything else they want from: venue/RSVP deadline/welcome message (EN/JA/MY), schedule, FAQ, dress code, photos/background/music by URL, and colors/fonts.
 3. On submit, a backend function:
    - Checks the link ID isn't already taken.
    - Creates a new branch and commits `public/wedding-data_{slug}.json` (built from the template + their answers).
@@ -29,7 +29,20 @@ Anyone with this link can browse templates and submit a customized invitation. N
 
 ## What's customizable in this version
 
-Text only: groom/bride name (English), date, RSVP deadline, venue name/address, Google Maps link, welcome message. Photos, translations (JA/MY), schedule, and FAQ are **not** editable from this form — handle those the normal way (AdminPanel / Drive sync / manual edit) after merging.
+Everything is text/URL/color input — there's no file upload, so a couple never uploads an actual photo file here (that still goes through the usual upload-code flow after merging). What they *can* set from the form:
+
+- Groom/bride name, date, RSVP deadline, link ID, contact email
+- Venue name/address, Google Maps link
+- Welcome message in English, Japanese, and Burmese
+- Schedule (add/remove rows: time, event name, icon)
+- FAQ (add/remove rows: question, answer, icon — e.g. parking, dress code, dietary, etc.)
+- Dress-code color palette (toggle + up to 8 swatches + a note)
+- Cover/groom/bride/background photo and gallery, all by **URL** (not uploaded)
+- Background music, by URL
+- Colors: accent, main text, page tint, block/card background, photo border
+- Fonts: separate title vs. paragraph font, per language (reuses the same curated font list as AdminPanel)
+
+Not yet editable from this form: actual file uploads (couples still need the existing upload-code link for real photo files), and anything beyond the above (e.g. the envelope animation, lightbox behavior, layout).
 
 ---
 
