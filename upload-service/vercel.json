@@ -10,8 +10,9 @@
     }
   ],
   "functions": {
-    "api/upload.js":        { "maxDuration": 60 },
-    "api/create-blob.js":   { "maxDuration": 60 },
-    "api/commit-photos.js": { "maxDuration": 30 }
+    "api/upload.js":            { "maxDuration": 60 },
+    "api/create-blob.js":       { "maxDuration": 60 },
+    "api/commit-photos.js":     { "maxDuration": 30 },
+    "api/create-invitation.js": { "maxDuration": 30 }
   }
 }

@@ -36,6 +36,8 @@
               'wedding-gold': 'rgb(var(--color-primary) / <alpha-value>)',
               'wedding-sand': 'rgb(var(--color-bg-tint) / <alpha-value>)',
               'wedding-text': 'rgb(var(--color-text) / <alpha-value>)',
+              'wedding-card': 'rgb(var(--color-card) / <alpha-value>)',
+              'wedding-border': 'rgb(var(--color-border) / <alpha-value>)',
             },
             animation: {
               'fade-in': 'fadeIn 1.5s ease-in-out',
@@ -63,6 +65,12 @@
       }
       h1, h2, h3, .font-serif {
         font-family: var(--font-main), serif;
+      }
+      /* Optional separate heading font, per couple — wins over the rule above via higher
+         class-selector specificity on any heading whose className was switched to font-title
+         (see App.tsx). Falls back to --font-main for every couple that doesn't set titleFonts. */
+      .font-title {
+        font-family: var(--font-title), serif;
       }
       .font-script {
         font-family: 'Great Vibes', cursive;

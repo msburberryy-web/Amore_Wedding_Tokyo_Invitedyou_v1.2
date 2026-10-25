@@ -23,6 +23,8 @@ export interface ThemeColors {
   primary: string; // The main accent (Gold)
   text: string;    // Main text color
   backgroundTint: string; // The light background color (Sand)
+  cardBackground?: string; // Optional: background for key content blocks (e.g. the Access/location card). Falls back to the existing default when absent.
+  border?: string; // Optional: border/frame color for the groom/bride profile photos. Falls back to white (today's default) when absent.
 }
 
 export interface FontConfig {
@@ -75,6 +77,7 @@ export interface WeddingData {
   };
   theme: ThemeColors;
   fonts: FontConfig;
+  titleFonts?: FontConfig; // Optional: separate font for headings (h1/h2/h3) per language. Falls back to `fonts` when absent.
   visuals: VisualConfig;
 }
 
