@@ -56,6 +56,14 @@ export interface WeddingData {
     show: boolean;
     text: LocalizedString;
   };
+  groomNote?: { // Optional personal greeting/note from the groom, shown in italics under his profile photo
+    show: boolean;
+    text: LocalizedString;
+  };
+  brideNote?: { // Optional personal greeting/note from the bride, shown in italics under her profile photo — independent of groomNote, either can be enabled alone
+    show: boolean;
+    text: LocalizedString;
+  };
   dressCode?: { // Optional wedding color palette for guests to follow — not every couple uses this
     show: boolean;
     colors: string[]; // hex codes, e.g. ["#C5A059", "#4A4A4A"]

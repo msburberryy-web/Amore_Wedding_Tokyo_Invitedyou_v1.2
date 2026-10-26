@@ -774,6 +774,9 @@ const App: React.FC = () => {
                         <div className="mt-6">
                              <h3 className={`${getNameFontSize(data.groomName[lang])} font-title ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Groom</p>
+                             {data.groomNote?.show && data.groomNote.text[lang] && (
+                               <p className={`italic text-sm mt-3 font-serif leading-relaxed ${pageBgImage ? nightBandTextClass : 'text-gray-500'}`}>"{data.groomNote.text[lang]}"</p>
+                             )}
                         </div>
                     </div>
 
@@ -789,6 +792,9 @@ const App: React.FC = () => {
                          <div className="mt-6">
                              <h3 className={`${getNameFontSize(data.brideName[lang])} font-title ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Bride</p>
+                             {data.brideNote?.show && data.brideNote.text[lang] && (
+                               <p className={`italic text-sm mt-3 font-serif leading-relaxed ${pageBgImage ? nightBandTextClass : 'text-gray-500'}`}>"{data.brideNote.text[lang]}"</p>
+                             )}
                         </div>
                     </div>
                 </div>
