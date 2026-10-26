@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
-import { WeddingData, Language, DEFAULT_DATA } from './types';
+import { WeddingData, Language, DEFAULT_DATA, LocalizedString } from './types';
 import LanguageSwitch from './components/LanguageSwitch';
 import Countdown from './components/Countdown';
 import RsvpForm from './components/RsvpForm'; 
@@ -214,9 +214,14 @@ const App: React.FC = () => {
     if (ref.current) ref.current.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Helper function to adjust font size based on name length
-  const getNameFontSize = (name: string) => {
-    return name.length > 15 ? 'text-lg' : name.length > 10 ? 'text-xl' : 'text-2xl';
+  // Helper function to adjust font size based on name length. Takes the longest of the three
+  // language versions so the picked size — and therefore the rendered size — stays the same
+  // regardless of which language is currently showing (Japanese names are typically much shorter
+  // in character count than their English/Burmese equivalents, which used to pick a visibly
+  // bigger size for the same name just because of the language toggle).
+  const getNameFontSize = (name: LocalizedString) => {
+    const len = Math.max(name.en.length, name.ja.length, name.my.length);
+    return len > 15 ? 'text-lg' : len > 10 ? 'text-xl' : 'text-2xl';
   };
 
   // Names are stored ALL CAPS (looks right with the default tracked serif style), but a script/
@@ -772,7 +777,7 @@ const App: React.FC = () => {
                              </div>
                         </div>
                         <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.groomName[lang])} font-title ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.groomName)} font-title ${nightBandTextClass}`}>{data.groomName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Groom</p>
                              {data.groomNote?.show && data.groomNote.text[lang] && (
                                <p className={`italic text-sm mt-3 font-serif leading-relaxed ${pageBgImage ? nightBandTextClass : 'text-gray-500'}`}>"{data.groomNote.text[lang]}"</p>
@@ -790,7 +795,7 @@ const App: React.FC = () => {
                              </div>
                         </div>
                          <div className="mt-6">
-                             <h3 className={`${getNameFontSize(data.brideName[lang])} font-title ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
+                             <h3 className={`${getNameFontSize(data.brideName)} font-title ${nightBandTextClass}`}>{data.brideName[lang]}</h3>
                              <p className="text-xs text-wedding-gold uppercase tracking-widest mt-1">Bride</p>
                              {data.brideNote?.show && data.brideNote.text[lang] && (
                                <p className={`italic text-sm mt-3 font-serif leading-relaxed ${pageBgImage ? nightBandTextClass : 'text-gray-500'}`}>"{data.brideNote.text[lang]}"</p>
