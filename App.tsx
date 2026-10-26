@@ -696,10 +696,10 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center relative z-10 w-full px-4">
                     <p
                         className={pageBgImage
-                            ? 'text-2xl sm:text-3xl md:text-5xl tracking-[0.08em] sm:tracking-[0.12em] md:tracking-[0.15em] uppercase mb-6 md:mb-12 font-serif whitespace-nowrap'
+                            ? 'text-3xl sm:text-4xl md:text-6xl tracking-[0.05em] sm:tracking-[0.08em] md:tracking-[0.1em] uppercase mb-6 md:mb-12 font-serif whitespace-nowrap'
                             : 'text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2'
                         }
-                        style={pageBgImage ? { color: '#F5D576', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}
+                        style={pageBgImage ? { color: '#E8C547', textShadow: '0 2px 10px rgba(0,0,0,0.75), 0 4px 28px rgba(0,0,0,0.55)' } : undefined}
                     >{t.saveTheDate}</p>
                     
                     <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} mb-2 md:mb-4 ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
