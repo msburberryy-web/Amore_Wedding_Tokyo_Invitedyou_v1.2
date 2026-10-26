@@ -693,7 +693,7 @@ const App: React.FC = () => {
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
-                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[3cm] md:mt-[5cm]' : ''}`}>
+                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[2cm] md:mt-[4cm]' : ''}`}>
                     <p
                         className={pageBgImage
                             ? 'text-5xl sm:text-6xl md:text-8xl tracking-[0.02em] sm:tracking-[0.04em] md:tracking-[0.06em] uppercase mb-[0.3cm] md:mb-[0.6cm] font-serif font-bold whitespace-nowrap'
@@ -710,7 +710,7 @@ const App: React.FC = () => {
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
-                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[0.5cm] md:mt-[1cm]' : 'mt-4 md:mt-12'}`}>
+                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[2.5cm] md:mt-[3cm]' : 'mt-4 md:mt-12'}`}>
                         <p className="text-base md:text-3xl font-serif tracking-[0.2em] drop-shadow-md text-white">{formattedDate}</p>
                     </div>
                 </div>
