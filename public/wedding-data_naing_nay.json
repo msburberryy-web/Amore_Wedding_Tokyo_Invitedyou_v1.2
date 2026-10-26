@@ -155,8 +155,19 @@
       "icon": "baby"
     }
   ],
-  "showGallery": false,
+  "showGallery": true,
+  "gallery": [
+    "./photos/naing_nay/gallery1.jpg",
+    "./photos/naing_nay/gallery2.jpg",
+    "./photos/naing_nay/gallery3.jpg",
+    "./photos/naing_nay/gallery4.jpg"
+  ],
   "musicUrl": "",
+  "images": {
+    "hero": "./photos/naing_nay/cover.jpg",
+    "groom": "./photos/naing_nay/groom.jpg",
+    "bride": "./photos/naing_nay/bride.jpg"
+  },
   "theme": {
     "primary": "#C5A059",
     "text": "#4A4A4A",
