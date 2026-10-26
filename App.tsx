@@ -693,16 +693,16 @@ const App: React.FC = () => {
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
-                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[1.5cm] md:mt-[2cm]' : ''}`}>
+                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[3cm] md:mt-[5cm]' : ''}`}>
                     <p
                         className={pageBgImage
-                            ? 'text-5xl sm:text-6xl md:text-8xl tracking-[0.02em] sm:tracking-[0.04em] md:tracking-[0.06em] uppercase mb-6 md:mb-12 font-serif font-bold whitespace-nowrap'
+                            ? 'text-5xl sm:text-6xl md:text-8xl tracking-[0.02em] sm:tracking-[0.04em] md:tracking-[0.06em] uppercase mb-[0.3cm] md:mb-[0.6cm] font-serif font-bold whitespace-nowrap'
                             : 'text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2'
                         }
                         style={pageBgImage ? { color: '#E8C547', textShadow: '0 2px 10px rgba(0,0,0,0.75), 0 4px 28px rgba(0,0,0,0.55)' } : undefined}
                     >{t.saveTheDate}</p>
                     
-                    <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} mb-2 md:mb-4 ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+                    <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} ${pageBgImage ? 'mb-[0.1cm] md:mb-[0.2cm]' : 'mb-2 md:mb-4'} ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
                         style={pageBgImage ? { color: '#FFFFFF', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}
                     >
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
@@ -710,7 +710,7 @@ const App: React.FC = () => {
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
-                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[calc(6rem-1cm)] md:mt-[calc(10rem-1cm)]' : 'mt-4 md:mt-12'}`}>
+                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[0.5cm] md:mt-[1cm]' : 'mt-4 md:mt-12'}`}>
                         <p className="text-base md:text-3xl font-serif tracking-[0.2em] drop-shadow-md text-white">{formattedDate}</p>
                     </div>
                 </div>
