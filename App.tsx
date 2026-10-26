@@ -693,7 +693,7 @@ const App: React.FC = () => {
             <div className="absolute inset-0 bg-black/10 z-0" />
             
             <div className={`relative z-10 text-white p-6 w-full max-w-6xl mx-auto h-full flex flex-col justify-center items-center transition-opacity duration-1000 ${contentAnimationClass}`}>
-                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[3cm] md:mt-[2cm]' : ''}`}>
+                <div className={`flex flex-col items-center relative z-10 w-full px-4 ${pageBgImage ? 'mt-[1.5cm] md:mt-[2cm]' : ''}`}>
                     <p
                         className={pageBgImage
                             ? 'text-5xl sm:text-6xl md:text-8xl tracking-[0.02em] sm:tracking-[0.04em] md:tracking-[0.06em] uppercase mb-6 md:mb-12 font-serif font-bold whitespace-nowrap'
