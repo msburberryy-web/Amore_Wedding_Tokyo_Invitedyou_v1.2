@@ -30,6 +30,22 @@
     "ja": "このたび 私たちは結婚することになりました\n皆様に見守られながら 新しい人生の第一歩を踏み出したいと存じます",
     "my": "ကျွန်ုပ်တို့၏ မင်္ဂလာပွဲသို့ ကြွရောက်ချီးမြှင့်ပါရန် ဖိတ်ကြားအပ်ပါသည်။"
   },
+  "groomNote": {
+    "show": true,
+    "text": {
+      "en": "With a grateful heart, I look forward to beginning this beautiful journey of forever with the woman I love. It would mean so much to have you by our side as we celebrate this special day together.",
+      "ja": "With a grateful heart, I look forward to beginning this beautiful journey of forever with the woman I love. It would mean so much to have you by our side as we celebrate this special day together.",
+      "my": "With a grateful heart, I look forward to beginning this beautiful journey of forever with the woman I love. It would mean so much to have you by our side as we celebrate this special day together."
+    }
+  },
+  "brideNote": {
+    "show": true,
+    "text": {
+      "en": "Some moments become even more beautiful when shared with the people we love. As we begin this new chapter of our lives, having you with us would mean more than words could ever express. Thank you for being a part of our love story.",
+      "ja": "Some moments become even more beautiful when shared with the people we love. As we begin this new chapter of our lives, having you with us would mean more than words could ever express. Thank you for being a part of our love story.",
+      "my": "Some moments become even more beautiful when shared with the people we love. As we begin this new chapter of our lives, having you with us would mean more than words could ever express. Thank you for being a part of our love story."
+    }
+  },
   "googleFormUrl": "",
   "googleScriptUrl": "https://script.google.com/macros/s/AKfycbzpxn-_fdcSLddAFGDE4YBbj0WfvZXDJWFSVedioyLLVmOuJkyadiQxM2NTFRJl9uw8wQ/exec",
   "showSchedule": true,

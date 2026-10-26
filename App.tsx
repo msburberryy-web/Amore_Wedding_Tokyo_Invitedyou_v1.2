@@ -710,7 +710,7 @@ const App: React.FC = () => {
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.brideName[lang]) : data.brideName[lang]}</span>
                         </h1>
 
-                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[calc(6rem+4cm)] md:mt-[calc(10rem+4cm)]' : 'mt-4 md:mt-12'}`}>
+                    <div className={`inline-block bg-white/15 backdrop-blur-md border border-white/40 py-2 md:py-4 px-6 md:px-12 rounded-sm shadow-lg ${pageBgImage ? 'mt-[calc(6rem+3cm)] md:mt-[calc(10rem+3cm)]' : 'mt-4 md:mt-12'}`}>
                         <p className="text-base md:text-3xl font-serif tracking-[0.2em] drop-shadow-md text-white">{formattedDate}</p>
                     </div>
                 </div>
