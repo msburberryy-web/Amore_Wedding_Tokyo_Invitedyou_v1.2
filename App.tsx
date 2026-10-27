@@ -704,7 +704,18 @@ const App: React.FC = () => {
                             ? 'text-5xl sm:text-6xl md:text-8xl tracking-[0.02em] sm:tracking-[0.04em] md:tracking-[0.06em] uppercase mb-[0.3cm] md:mb-[0.6cm] font-serif font-bold whitespace-nowrap'
                             : 'text-sm md:text-xl tracking-[0.3em] uppercase mb-6 md:mb-12 drop-shadow-md text-white font-serif border-b border-white/60 pb-2'
                         }
-                        style={pageBgImage ? { color: '#E8C547', textShadow: '0 2px 10px rgba(0,0,0,0.75), 0 4px 28px rgba(0,0,0,0.55)' } : undefined}
+                        style={pageBgImage ? {
+                            color: '#E8C547',
+                            textShadow: '0 2px 10px rgba(0,0,0,0.75), 0 4px 28px rgba(0,0,0,0.55)',
+                            // "Save The Date" shows the same literal English text in both en and ja
+                            // (t.saveTheDate isn't translated for ja), but font-serif normally
+                            // switches to the couple's Japanese font there, which visually renders
+                            // bigger at the same font-size than the English font — pin it to the
+                            // English font whenever the displayed text is that English phrase, so
+                            // it matches the English version. my shows real Burmese text and still
+                            // needs its own font to render the glyphs at all.
+                            ...(lang !== 'my' ? { fontFamily: (data.fonts?.en || DEFAULT_DATA.fonts.en).replace(/"/g, '') } : {}),
+                        } : undefined}
                     >{t.saveTheDate}</p>
                     
                     <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} ${pageBgImage ? 'mb-[0.1cm] md:mb-[0.2cm]' : 'mb-2 md:mb-4'} ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
