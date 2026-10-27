@@ -717,8 +717,13 @@ const App: React.FC = () => {
                             ...(lang !== 'my' ? { fontFamily: (data.fonts?.en || DEFAULT_DATA.fonts.en).replace(/"/g, '') } : {}),
                         } : undefined}
                     >{t.saveTheDate}</p>
-                    
-                    <h1 className={`${pageBgImage ? 'font-script-khant text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row' : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} ${pageBgImage ? 'mb-[0.1cm] md:mb-[0.2cm]' : 'mb-2 md:mb-4'} ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
+
+                    {/* The Alex Brush cursive script (font-script-khant) has no Japanese or Burmese
+                        glyphs, so ja/my names fell back to a mismatched system font. Use it only for
+                        en; ja/my fall back to font-serif, which already resolves to the couple's own
+                        configured font per language (e.g. khant_aye's Shippori Mincho for ja),
+                        matching the rest of the page's Japanese text. */}
+                    <h1 className={`${pageBgImage ? `${lang === 'en' ? 'font-script-khant' : 'font-serif'} text-4xl sm:text-6xl md:text-8xl lg:text-9xl tracking-normal flex-col md:flex-row` : 'font-title text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.1em] sm:tracking-[0.2em] md:tracking-[0.3em] flex-col md:flex-row flex-wrap'} ${pageBgImage ? 'mb-[0.1cm] md:mb-[0.2cm]' : 'mb-2 md:mb-4'} ${pageBgImage ? '' : 'drop-shadow-2xl text-white'} flex justify-center items-center font-light max-w-[95%] md:max-w-[85%] leading-tight`}
                         style={pageBgImage ? { color: '#FFFFFF', textShadow: '0 2px 10px rgba(0,0,0,0.7), 0 4px 28px rgba(0,0,0,0.5)' } : undefined}
                     >
                             <span className={pageBgImage ? 'text-center px-1 whitespace-nowrap' : 'break-words text-center px-2 italic'}>{pageBgImage ? toTitleCase(data.groomName[lang]) : data.groomName[lang]}</span>
