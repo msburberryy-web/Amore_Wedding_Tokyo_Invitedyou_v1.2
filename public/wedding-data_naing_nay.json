@@ -11,7 +11,7 @@
   },
   "date": "2027-01-02",
   "showCountdown": true,
-  "rsvpDeadline": "2026-10-30",
+  "rsvpDeadline": "2026-12-01",
   "location": {
     "name": {
       "en": "Shinagawa Pacific Garden",
@@ -44,16 +44,7 @@
       "icon": "reception"
     },
     {
-      "time": "12:00",
-      "title": {
-        "en": "Ceremony",
-        "ja": "挙式",
-        "my": "မင်္ဂလာအခမ်းအနား"
-      },
-      "icon": "ceremony"
-    },
-    {
-      "time": "12:00",
+      "time": "12:30",
       "title": {
         "en": "Banquet Begins",
         "ja": "開宴",
