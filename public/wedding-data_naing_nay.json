@@ -153,7 +153,7 @@
     "./photos/[event-folder]/gallery3.jpg",
     "./photos/[event-folder]/gallery4.jpg"
   ],
-  "musicUrl": "",
+  "musicUrl": "./photos/naing_nay/background-music.mp3",
   "images": {
     "hero": "./photos/naing_nay/cover.jpg",
     "groom": "./photos/naing_nay/groom.jpg",
