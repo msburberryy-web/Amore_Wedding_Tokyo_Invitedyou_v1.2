@@ -32,10 +32,12 @@ const EnvelopeOverlay: React.FC<Props> = ({ data, dataLoaded, onOpen }) => {
 
   const startSequence = () => {
     if (stage !== 'closed') return;
-    // Skip the generic paper-rustle sound effect for the hasArt variant — this couple has their own
-    // background music track (data.musicUrl, started by App.tsx once onOpen() fires below), and
-    // playing both together is exactly the "two tracks at once" overlap that was reported.
-    if (!hasArt) playPaperSound();
+    // Skip the generic paper-rustle sound effect for any couple with their own background music
+    // track (data.musicUrl, started by App.tsx once onOpen() fires below) — playing both together
+    // is the "two tracks at once" overlap that was reported. This used to be keyed off hasArt
+    // (pageBackground) instead, which happened to cover khant_aye but missed any other couple who
+    // has musicUrl set without also using the art envelope style (e.g. naing_nay).
+    if (!data.musicUrl) playPaperSound();
     setStage('opening');
     document.body.style.overflow = '';
     if (hasArt) {
