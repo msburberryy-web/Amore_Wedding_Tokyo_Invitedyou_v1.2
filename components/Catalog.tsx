@@ -76,7 +76,14 @@ const Catalog: React.FC<Props> = ({ lang, setLang }) => {
           {templates?.map(tpl => (
             <div key={tpl.id} className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                <img src={tpl.previewImage} alt={tpl.name[lang] || tpl.name.en} className="w-full h-full object-cover" />
+                {tpl.previewImage
+                  ? <img src={tpl.previewImage} alt={tpl.name[lang] || tpl.name.en} className="w-full h-full object-cover" />
+                  : <div className="h-full grid place-items-center bg-[#F7F3E8] text-[#333B2B] p-5">
+                      <div className="border border-[#7A8154] px-8 py-6 text-center">
+                        <span className="block text-4xl leading-tight" style={{ fontFamily: '"Cormorant Garamond", serif' }}>Ivory &amp; Olive</span>
+                        <span className="text-xs tracking-widest uppercase">Wedding invitation</span>
+                      </div>
+                    </div>}
               </div>
               <div className="p-5">
                 <h2 className="text-lg font-semibold text-[#4A4A4A] mb-1">{tpl.name[lang] || tpl.name.en}</h2>

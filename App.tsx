@@ -24,6 +24,7 @@ const _isUploadMode = _urlParams.get('mode') === 'upload';
 const _uploadEvent  = _urlParams.get('event') || '';
 const _isCatalogMode = _urlParams.get('mode') === 'catalog';
 const _isCustomizeMode = _urlParams.get('mode') === 'customize';
+const _isPreviewMode = _urlParams.get('mode') === 'preview' && window.parent !== window;
 const _customizeTemplate = _urlParams.get('template') || '';
 
 const TRANSLATIONS = {
@@ -232,6 +233,17 @@ const App: React.FC = () => {
 
   // 1. Initialization & Data Loading
   useEffect(() => {
+    if (_isPreviewMode) {
+      const receive = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin || event.source !== window.parent || event.data?.type !== 'amore:invitation-preview') return;
+        setData(event.data.data as WeddingData);
+        if (['en', 'ja', 'my'].includes(event.data.language)) setLang(event.data.language);
+        setDataLoaded(true);
+      };
+      window.addEventListener('message', receive);
+      window.parent.postMessage({ type: 'amore:preview-ready' }, window.location.origin);
+      return () => window.removeEventListener('message', receive);
+    }
     // SECURITY: Control Admin Access based on Build Environment
     let isBuildEnabled = false;
     
@@ -348,7 +360,7 @@ const App: React.FC = () => {
           location: { 
             ...DEFAULT_DATA.location, 
             ...(externalData.location || {}),
-            mapUrl: ensureEmbedUrl(externalData.location?.mapUrl || DEFAULT_DATA.location.mapUrl)
+            mapUrl: ensureEmbedUrl(externalData.location?.mapUrl ?? DEFAULT_DATA.location.mapUrl)
           },
           images: { ...DEFAULT_DATA.images, ...(externalData.images || {}) },
           theme: { ...DEFAULT_DATA.theme, ...(externalData.theme || {}) },
@@ -407,6 +419,7 @@ const App: React.FC = () => {
 
   const handleEnvelopeOpen = () => {
       setIsEnvelopeOpen(true);
+      if (_isPreviewMode) return;
       if (audioRef.current && !isPlaying) {
           audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
       }
@@ -421,7 +434,7 @@ const App: React.FC = () => {
   
   // Handle case where envelope is disabled
   useEffect(() => {
-      if (data.visuals && !data.visuals.enableEnvelope) {
+      if (!_isPreviewMode && data.visuals && !data.visuals.enableEnvelope) {
           const hasSeen = localStorage.getItem('amore_guide_seen');
           if (!hasSeen && !showAdmin) {
                // Small delay for initial render
@@ -611,7 +624,9 @@ const App: React.FC = () => {
   }, [data.location.mapUrl]);
 
   const showEnvelope = data.visuals?.enableEnvelope && !isEnvelopeOpen && !showAdmin;
-  const contentAnimationClass = (!data.visuals?.enableEnvelope || isEnvelopeOpen) && data.visuals?.enableAnimations ? 'fade-in' : 'opacity-0';
+  const contentAnimationClass = showEnvelope ? 'opacity-0' : data.visuals?.enableAnimations ? 'fade-in' : '';
+
+  if (_isPreviewMode && !dataLoaded) return <div className="p-5 text-sm">Waiting for valid invitation details…</div>;
 
   return (
     <div
@@ -876,9 +891,9 @@ const App: React.FC = () => {
                <div className={`p-8 md:p-12 text-center ${pageBgImage ? cardClass.replace('mx-4 md:mx-10', '') : 'bg-wedding-card rounded-sm border border-gray-100'}`}>
                     <h3 className="text-2xl font-title font-bold mb-4 text-gray-800">{data.location.name[lang]}</h3>
                     <p className="text-gray-500 mb-8 font-light">{data.location.address[lang]}</p>
-                    <div className="h-64 md:h-80 w-full bg-gray-200 mb-8 grayscale hover:grayscale-0 transition-all duration-700">
+                    {data.location.mapUrl && <div className="h-64 md:h-80 w-full bg-gray-200 mb-8 grayscale hover:grayscale-0 transition-all duration-700">
                          <iframe ref={mapFrameRef} src={data.location.mapUrl} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
-                    </div>
+                    </div>}
 
                     {/* Diagnostic: log the iframe DOM src after mapUrl changes (helps confirm deployed DOM matches merged data) */}
                     <script dangerouslySetInnerHTML={{ __html: `
@@ -962,7 +977,7 @@ const App: React.FC = () => {
                     </div>
                   )}
                   <div className="border border-wedding-gold p-1 inline-block rounded-full">
-                    <button onClick={() => setView('rsvp')} className="w-full md:w-auto px-16 py-4 bg-wedding-gold text-white font-serif text-xl tracking-widest uppercase hover:bg-wedding-text transition-colors rounded-full shadow-lg">{t.rsvp}</button>
+                    <button disabled={_isPreviewMode} onClick={() => setView('rsvp')} className="w-full md:w-auto px-16 py-4 bg-wedding-gold text-white font-serif text-xl tracking-widest uppercase hover:bg-wedding-text transition-colors rounded-full shadow-lg">{t.rsvp}</button>
                   </div>
                   <p className={`mt-6 font-light text-sm ${pageBgImage ? 'text-[#F6EFE1]/70' : 'text-gray-400'}`}>{t.rsvpNote}</p>
                 </>
@@ -983,7 +998,7 @@ const App: React.FC = () => {
                      <button onClick={() => scrollToSection(accessRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><MapPin size={15} /><span className="text-[9px] mt-0.5">{t.access}</span></button>
                     {isRsvpClosed
                       ? <div className="flex flex-col items-center justify-center w-full h-full rounded-xl bg-gray-200/70 text-gray-400 my-1.5 mx-0.5"><span className="text-[9px] font-bold">{t.rsvp}</span></div>
-                      : <button onClick={() => setView('rsvp')} className="flex flex-col items-center justify-center w-full h-full rounded-xl bg-wedding-gold/90 backdrop-blur-sm text-white my-1.5 mx-0.5"><span className="text-[9px] font-bold">{t.rsvp}</span></button>
+                      : <button disabled={_isPreviewMode} onClick={() => setView('rsvp')} className="flex flex-col items-center justify-center w-full h-full rounded-xl bg-wedding-gold/90 backdrop-blur-sm text-white my-1.5 mx-0.5"><span className="text-[9px] font-bold">{t.rsvp}</span></button>
                     }
                      <button onClick={() => scrollToSection(galleryRef)} className="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-wedding-gold"><Camera size={15} /><span className="text-[9px] mt-0.5">{t.gallery}</span></button>
                </div>

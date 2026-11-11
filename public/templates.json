@@ -1,7 +1,11 @@
 [
   {
     "id": "starry_night",
-    "name": { "en": "Starry Night", "ja": "星月夜", "my": "ကြယ်စုံည" },
+    "name": {
+      "en": "Starry Night",
+      "ja": "星月夜",
+      "my": "ကြယ်စုံည"
+    },
     "description": {
       "en": "A dreamy Van Gogh-inspired night sky theme with elegant script names, a moving photo gallery, and a merged traditional-invitation card.",
       "ja": "ゴッホの「星月夜」にインスパイアされた、優雅な筆記体のお名前と動くギャラリーが特徴のテーマです。",
@@ -9,5 +13,20 @@
     },
     "previewImage": "./photos/khant_aye/page-bg-terrace.jpg",
     "seedFile": "templates/starry_night.json"
+  },
+  {
+    "id": "ivory_olive",
+    "name": {
+      "en": "Ivory & Olive",
+      "ja": "アイボリー＆オリーブ",
+      "my": "ဆင်စွယ်နှင့် သံလွင်"
+    },
+    "description": {
+      "en": "Warm ivory, muted olive, and classic serif type for a quiet garden wedding.",
+      "ja": "温かみのあるアイボリーと落ち着いたオリーブ色の、クラシックなガーデンウェディング向けデザイン。",
+      "my": "ဆင်စွယ်ရောင်နဲ့ သံလွင်ရောင်ဖျော့ကို သုံးထားတဲ့ ဂန္ထဝင်ဆန်သော မင်္ဂလာဖိတ်စာပုံစံ။"
+    },
+    "previewImage": "",
+    "seedFile": "templates/ivory_olive.json"
   }
 ]
