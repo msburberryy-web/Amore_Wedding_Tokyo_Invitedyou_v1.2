@@ -1,257 +1,112 @@
 import { githubRequest } from './_github.js';
+import { buildInvitation, validateSubmission } from '../lib/invitation-draft.mjs';
 
-const REPO_OWNER   = 'msburberryy-web';
-const REPO_NAME    = 'Amore_Wedding_Tokyo_Invitedyou_v1.2';
-const BASE_BRANCH  = 'main';
+const repo = '/repos/msburberryy-web/Amore_Wedding_Tokyo_Invitedyou_v1.2';
+const base = 'main';
+const allowedOrigins = new Set(['https://msburberryy-web.github.io']);
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
-};
-
-const SLUG_RE = /^[a-z0-9]{2,20}\.[a-z0-9]{2,20}$/;
-const HEX_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-const URL_RE = /^https?:\/\/\S+$/;
-const SCHEDULE_ICONS = new Set(['ceremony', 'reception', 'party', 'toast', 'meal', 'camera', 'end']);
-const FAQ_ICONS = new Set(['users', 'shirt', 'clock', 'map', 'utensils', 'calendar', 'gift', 'info', 'baby']);
-// Mirrors FONT_OPTIONS in types.ts — only these exact values may be written into fonts/titleFonts,
-// so a submission can't inject an arbitrary font-family value.
-const ALLOWED_FONTS = {
-  en: new Set(['"Cormorant Garamond"', '"Playfair Display"', '"Montserrat"']),
-  ja: new Set(['"Noto Sans JP"', '"Shippori Mincho"', '"Zen Maru Gothic"']),
-  my: new Set(['"Padauk"', '"Noto Serif Myanmar"', '"Noto Sans Myanmar"'])
-};
-
-function clean(value, max) {
-  return (typeof value === 'string' ? value : '').trim().slice(0, max);
+async function fileAt(path, ref) {
+  return githubRequest(`${repo}/contents/${path}?ref=${encodeURIComponent(ref)}`, 'GET');
 }
 
-function cleanUrl(value, max) {
-  const v = clean(value, max);
-  return URL_RE.test(v) ? v : '';
-}
-
-function cleanSchedule(input) {
-  if (!Array.isArray(input)) return [];
-  return input.slice(0, 20).map(row => ({
-    time: clean(row?.time, 20),
-    titleEn: clean(row?.titleEn, 120),
-    icon: SCHEDULE_ICONS.has(row?.icon) ? row.icon : 'reception'
-  })).filter(r => r.time && r.titleEn);
-}
-
-function cleanFaq(input) {
-  if (!Array.isArray(input)) return [];
-  return input.slice(0, 20).map(row => ({
-    questionEn: clean(row?.questionEn, 300),
-    answerEn: clean(row?.answerEn, 3000),
-    icon: FAQ_ICONS.has(row?.icon) ? row.icon : 'info'
-  })).filter(r => r.questionEn && r.answerEn);
-}
-
-function cleanColors(input) {
-  if (!Array.isArray(input)) return [];
-  return input.slice(0, 8).map(c => clean(c, 10)).filter(c => HEX_RE.test(c));
-}
-
-function cleanGalleryUrls(input) {
-  if (!Array.isArray(input)) return [];
-  return input.slice(0, 20).map(u => cleanUrl(u, 1000)).filter(Boolean);
-}
-
-function cleanHex(value) {
-  const v = clean(value, 10);
-  return HEX_RE.test(v) ? v : '';
-}
-
-function cleanFont(value, lang) {
-  const v = clean(value, 60);
-  return ALLOWED_FONTS[lang]?.has(v) ? v : '';
-}
-
-async function getFileJson(path) {
-  const res = await githubRequest(
-    `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BASE_BRANCH}`,
-    'GET'
-  );
-  if (res.status !== 200) return { status: res.status, json: null };
-  const json = JSON.parse(Buffer.from(res.body.content, 'base64').toString('utf-8'));
-  return { status: 200, json };
+function decode(file) {
+  return Buffer.from(file.content, 'base64').toString('utf8');
 }
 
 export default async function handler(req, res) {
-  Object.entries(CORS).forEach(([k, v]) => res.setHeader(k, v));
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const origin = req.headers?.origin;
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Vary', 'Origin');
+  if (origin && !allowedOrigins.has(origin)) return res.status(403).json({ error: 'Use the invitation catalog to submit your draft.' });
+  if (origin) res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed.' });
+  if (!req.headers?.['content-type']?.startsWith('application/json')) return res.status(415).json({ error: 'Submit the form as JSON.' });
 
-  const body = req.body || {};
-
-  // Honeypot — bots that fill hidden fields get a fake success, no PR is created.
-  if (body.hp) return res.status(200).json({ success: true });
-
-  const templateId        = clean(body.templateId, 40);
-  const slug               = clean(body.slug, 42).toLowerCase();
-  const groomNameEn        = clean(body.groomNameEn, 120);
-  const brideNameEn        = clean(body.brideNameEn, 120);
-  const date               = clean(body.date, 40);
-  const rsvpDeadline        = clean(body.rsvpDeadline, 40);
-  const locationNameEn      = clean(body.locationNameEn, 120);
-  const locationAddressEn   = clean(body.locationAddressEn, 2000);
-  const mapUrl              = clean(body.mapUrl, 1000);
-  const messageEn           = clean(body.messageEn, 4000);
-  const messageJa           = clean(body.messageJa, 4000);
-  const messageMy           = clean(body.messageMy, 4000);
-  const contactEmail        = clean(body.contactEmail, 200);
-  const schedule            = cleanSchedule(body.schedule);
-  const faq                 = cleanFaq(body.faq);
-  const dressShow           = !!(body.dressCode && body.dressCode.show);
-  const dressColors         = cleanColors(body.dressCode && body.dressCode.colors);
-  const dressNote           = clean(body.dressCode && body.dressCode.note, 300);
-  const heroUrl             = cleanUrl(body.heroUrl, 1000);
-  const groomUrl            = cleanUrl(body.groomUrl, 1000);
-  const brideUrl            = cleanUrl(body.brideUrl, 1000);
-  const bgUrl               = cleanUrl(body.bgUrl, 1000);
-  const galleryUrls         = cleanGalleryUrls(body.galleryUrls);
-  const musicUrl            = cleanUrl(body.musicUrl, 1000);
-  const theme               = body.theme || {};
-  const colorPrimary        = cleanHex(theme.primary);
-  const colorText           = cleanHex(theme.text);
-  const colorBgTint         = cleanHex(theme.backgroundTint);
-  const colorCard           = cleanHex(theme.cardBackground);
-  const colorBorder         = cleanHex(theme.border);
-  const fonts               = body.fonts || {};
-  const fontEn              = cleanFont(fonts.en, 'en');
-  const fontJa              = cleanFont(fonts.ja, 'ja');
-  const fontMy              = cleanFont(fonts.my, 'my');
-  const titleFonts          = body.titleFonts || {};
-  const titleFontEn         = cleanFont(titleFonts.en, 'en');
-  const titleFontJa         = cleanFont(titleFonts.ja, 'ja');
-  const titleFontMy         = cleanFont(titleFonts.my, 'my');
-
-  if (!templateId || !slug || !groomNameEn || !brideNameEn || !date) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  const body = req.body;
+  if (body?.hp) return res.status(400).json({ error: 'Please resubmit the form.' });
+  if (Buffer.byteLength(JSON.stringify(body ?? null), 'utf8') > 160_000) {
+    return res.status(413).json({ error: 'The draft is too large. Shorten text or remove media links.' });
   }
-  if (!SLUG_RE.test(slug)) {
-    return res.status(400).json({ error: 'Link ID must look like groom.bride (lowercase letters/numbers only)' });
-  }
+  const { errors, value } = validateSubmission(body);
+  if (!value) return res.status(400).json({ error: 'Please correct the highlighted fields.', errors });
 
-  const folder = slug.replace(/\./g, '_');
+  const { templateId, slug, customization } = value;
+  const folder = slug.replace('.', '_');
+  const branch = `invitation/${folder}`;
+  const path = `public/wedding-data_${folder}.json`;
 
   try {
-    // 1. Load the chosen template seed
-    const { status: templateStatus, json: templateJson } = await getFileJson(`public/templates/${templateId}.json`);
-    if (templateStatus !== 200 || !templateJson) {
-      return res.status(400).json({ error: 'Unknown template' });
+    const baseRef = await githubRequest(`${repo}/git/ref/heads/${base}`, 'GET');
+    if (baseRef.status !== 200) throw new Error('base ref');
+    const baseSha = baseRef.body.object.sha;
+
+    const [seedFile, publishedFile] = await Promise.all([
+      fileAt(`public/templates/${templateId}.json`, baseSha),
+      fileAt(path, baseSha),
+    ]);
+    if (seedFile.status !== 200) throw new Error('template seed');
+    if (publishedFile.status === 200) return res.status(409).json({ error: 'That invitation link already exists. Choose a different link ID.' });
+    if (publishedFile.status !== 404) throw new Error('check link');
+
+    const invitation = buildInvitation(JSON.parse(decode(seedFile.body)), customization);
+    const content = JSON.stringify(invitation, null, 2) + '\n';
+    const existing = await fileAt(path, branch);
+    if (existing.status === 200) {
+      if (decode(existing.body) !== content) return res.status(409).json({ error: 'A different draft already uses that link ID. Choose another ID or contact the studio.' });
+    } else if (existing.status === 404) {
+      const parent = await githubRequest(`${repo}/git/commits/${baseSha}`, 'GET');
+      if (parent.status !== 200) throw new Error('parent commit');
+      const tree = await githubRequest(`${repo}/git/trees`, 'POST', {
+        base_tree: parent.body.tree.sha,
+        tree: [{ path, mode: '100644', type: 'blob', content }],
+      });
+      if (tree.status !== 201) throw new Error('invitation tree');
+      const commit = await githubRequest(`${repo}/git/commits`, 'POST', {
+        message: `Add invitation data for ${slug}`, tree: tree.body.sha, parents: [baseSha],
+      });
+      if (commit.status !== 201) throw new Error('invitation commit');
+      const ref = await githubRequest(`${repo}/git/refs`, 'POST', {
+        ref: `refs/heads/${branch}`, sha: commit.body.sha,
+      });
+      if (ref.status !== 201) {
+        if (ref.status === 422) return res.status(409).json({ error: 'This link ID is already in review. If you just submitted it, try again.' });
+        throw new Error('invitation branch');
+      }
+    } else {
+      throw new Error('draft branch check');
     }
 
-    // 2. Make sure this link isn't already taken
-    const { status: existingStatus } = await getFileJson(`public/wedding-data_${folder}.json`);
-    if (existingStatus === 200) {
-      return res.status(409).json({ error: 'That link is already taken — please choose another' });
+    const comparison = await githubRequest(`${repo}/compare/${baseSha}...${encodeURIComponent(branch)}`, 'GET');
+    if (comparison.status !== 200) throw new Error('draft comparison');
+    if (comparison.body.files?.length !== 1 || comparison.body.files[0].filename !== path || comparison.body.files[0].status !== 'added') {
+      return res.status(409).json({ error: 'That branch contains other changes. Contact the studio before resubmitting.' });
     }
 
-    // 3. Merge the couple's text into the template
-    const merged = {
-      ...templateJson,
-      groomName: { ...templateJson.groomName, en: groomNameEn },
-      brideName: { ...templateJson.brideName, en: brideNameEn },
-      date,
-      rsvpDeadline: rsvpDeadline || templateJson.rsvpDeadline,
-      location: {
-        ...templateJson.location,
-        name: { ...templateJson.location.name, en: locationNameEn || templateJson.location.name.en },
-        address: { ...templateJson.location.address, en: locationAddressEn || templateJson.location.address.en },
-        mapUrl: mapUrl || templateJson.location.mapUrl
-      },
-      message: {
-        en: messageEn || templateJson.message.en,
-        ja: messageJa || templateJson.message.ja,
-        my: messageMy || templateJson.message.my
-      },
-      schedule: schedule.length > 0
-        ? schedule.map(row => ({ time: row.time, title: { en: row.titleEn, ja: '', my: '' }, icon: row.icon }))
-        : templateJson.schedule,
-      faq: faq.length > 0
-        ? faq.map(row => ({ question: { en: row.questionEn, ja: '', my: '' }, answer: { en: row.answerEn, ja: '', my: '' }, icon: row.icon }))
-        : templateJson.faq,
-      dressCode: dressShow
-        ? { show: true, colors: dressColors.length > 0 ? dressColors : ['#C5A059', '#4A4A4A'], note: { en: dressNote, ja: '', my: '' } }
-        : (templateJson.dressCode || { show: false, colors: [], note: { en: '', ja: '', my: '' } }),
-      gallery: galleryUrls.length > 0 ? galleryUrls : templateJson.gallery,
-      musicUrl: musicUrl || templateJson.musicUrl,
-      images: {
-        hero: heroUrl || templateJson.images.hero,
-        groom: groomUrl || templateJson.images.groom,
-        bride: brideUrl || templateJson.images.bride,
-        pageBackground: bgUrl || templateJson.images.pageBackground
-      },
-      theme: {
-        primary: colorPrimary || templateJson.theme.primary,
-        text: colorText || templateJson.theme.text,
-        backgroundTint: colorBgTint || templateJson.theme.backgroundTint,
-        ...(colorCard ? { cardBackground: colorCard } : {}),
-        ...(colorBorder ? { border: colorBorder } : {})
-      },
-      fonts: {
-        en: fontEn || templateJson.fonts.en,
-        ja: fontJa || templateJson.fonts.ja,
-        my: fontMy || templateJson.fonts.my
-      },
-      ...((titleFontEn || titleFontJa || titleFontMy) ? {
-        titleFonts: {
-          en: titleFontEn || fontEn || templateJson.fonts.en,
-          ja: titleFontJa || fontJa || templateJson.fonts.ja,
-          my: titleFontMy || fontMy || templateJson.fonts.my
-        }
-      } : {})
-    };
+    const head = encodeURIComponent(`msburberryy-web:${branch}`);
+    const prs = await githubRequest(`${repo}/pulls?head=${head}&base=${base}&state=all`, 'GET');
+    if (prs.status !== 200) throw new Error('PR lookup');
+    if (prs.body.some(pr => pr.state === 'open')) return res.status(200).json({ success: true, reference: slug });
+    if (prs.body.length) return res.status(409).json({ error: 'A previous review exists for this link ID. Please contact the studio.' });
 
-    // 4. Create a new branch off main
-    const refRes = await githubRequest(`/repos/${REPO_OWNER}/${REPO_NAME}/git/ref/heads/${BASE_BRANCH}`, 'GET');
-    if (refRes.status !== 200) throw new Error('Failed to read base branch');
-    const baseSha = refRes.body.object.sha;
-
-    const branchName = `invitation/${folder}-${Date.now().toString(36)}`;
-    const createRefRes = await githubRequest(`/repos/${REPO_OWNER}/${REPO_NAME}/git/refs`, 'POST', {
-      ref: `refs/heads/${branchName}`,
-      sha: baseSha
+    const pr = await githubRequest(`${repo}/pulls`, 'POST', {
+      title: `Review invitation: ${slug}`,
+      head: branch,
+      base,
+      body: [
+        `Template: \`${templateId}\``,
+        `Invitation URL after merge: \`?event=${slug}\``,
+        '',
+        `Changes: \`${path}\` only.`,
+        'Review the customer-facing invitation text and media before merging. Configure the RSVP destination separately if needed.',
+      ].join('\n'),
     });
-    if (createRefRes.status !== 201) throw new Error('Failed to create branch');
-
-    // 5. Commit the new wedding-data JSON to that branch
-    const content = Buffer.from(JSON.stringify(merged, null, 2) + '\n', 'utf-8').toString('base64');
-    const putRes = await githubRequest(
-      `/repos/${REPO_OWNER}/${REPO_NAME}/contents/public/wedding-data_${folder}.json`,
-      'PUT',
-      { message: `New self-service invitation: ${groomNameEn} & ${brideNameEn}`, content, branch: branchName }
-    );
-    if (putRes.status !== 201) throw new Error('Failed to commit invitation file');
-
-    // 6. Open the PR for manual review
-    const prBodyLines = [
-      '**New self-service invitation submitted via the template catalog.**',
-      '',
-      `- Template: \`${templateId}\``,
-      `- Groom: ${groomNameEn}`,
-      `- Bride: ${brideNameEn}`,
-      `- Date: ${date}`,
-      `- Link: ?event=${slug}`,
-      contactEmail ? `- Contact: ${contactEmail}` : '',
-      '',
-      'Review the content, then merge to go live. Once merged, the usual upload-code flow lets the couple add their own photos.'
-    ].filter(Boolean);
-
-    const prRes = await githubRequest(`/repos/${REPO_OWNER}/${REPO_NAME}/pulls`, 'POST', {
-      title: `New invitation: ${groomNameEn} & ${brideNameEn}`,
-      head: branchName,
-      base: BASE_BRANCH,
-      body: prBodyLines.join('\n')
-    });
-    if (prRes.status !== 201) throw new Error('Failed to open PR');
-
-    return res.status(200).json({ success: true, prUrl: prRes.body.html_url });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+    if (pr.status !== 201) throw new Error('open PR');
+    return res.status(201).json({ success: true, reference: slug });
+  } catch (error) {
+    console.error('Invitation review could not be created:', error instanceof Error ? error.message : 'unknown');
+    return res.status(503).json({ error: 'The review could not be confirmed. Try again with the same link ID and details.' });
   }
 }

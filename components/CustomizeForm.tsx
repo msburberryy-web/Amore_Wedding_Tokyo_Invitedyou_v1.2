@@ -1,602 +1,234 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Language, FONT_OPTIONS } from '../types';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { Language, WeddingData } from '../types';
 import LanguageSwitch from './LanguageSwitch';
+import {
+  buildInvitation, createDraft, initialValue, sections, templateIds, validateSubmission,
+  type Draft, type EditableValue, type Field,
+} from '../upload-service/lib/invitation-draft.mjs';
 
-const API_BASE = (import.meta.env.VITE_UPLOAD_API_URL || '').replace(/\/$/, '');
+const apiBase = (import.meta.env.VITE_UPLOAD_API_URL || '').replace(/\/$/, '');
+type Props = { templateId: string; lang: Language; setLang: (lang: Language) => void };
+type Change = (value: EditableValue) => void;
 
-interface TemplateEntry {
-  id: string;
-  name: Record<Language, string>;
-  description: Record<Language, string>;
-  previewImage: string;
+function Fields({ fields, value, onChange }: { fields: Field[]; value: Draft; onChange: Change }) {
+  return <div className="grid gap-4">{fields.map(field => (
+    <FieldEditor key={field.key} field={field} value={value[field.key]} onChange={next => onChange({ ...value, [field.key]: next })} />
+  ))}</div>;
 }
 
-interface ScheduleRow { time: string; titleEn: string; icon: string }
-interface FaqRow { questionEn: string; answerEn: string; icon: string }
+const inputStyle = 'block w-full mt-1 rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm';
 
-const SCHEDULE_ICONS = ['reception', 'ceremony', 'toast', 'meal', 'camera', 'party', 'end'];
-const FAQ_ICONS = ['users', 'shirt', 'clock', 'map', 'utensils', 'calendar', 'gift', 'baby', 'info'];
+function FieldEditor({ field, value, onChange }: { field: Field; value: EditableValue; onChange: Change }) {
+  if (field.kind === 'group') return (
+    <fieldset className="rounded-lg border border-stone-200 p-3">
+      <legend className="px-1 font-medium text-sm">{field.label}</legend>
+      <Fields fields={field.fields ?? []} value={value as Draft} onChange={onChange} />
+    </fieldset>
+  );
 
-const T = {
-  en: {
-    title: 'Customize Your Invitation',
-    back: '← Back to catalog',
-    sectionBasics: 'The Basics',
-    sectionVenue: 'Venue & Message',
-    sectionSchedule: 'Schedule',
-    sectionFaq: 'FAQ',
-    sectionDress: 'Dress Code',
-    sectionMedia: 'Photos & Music (by URL)',
-    sectionDesign: 'Colors & Fonts',
-    colorPrimary: 'Accent color (gold by default)',
-    colorText: 'Main text color',
-    colorBgTint: 'Page tint color',
-    colorCard: 'Block/card background color',
-    colorBorder: 'Photo border color',
-    fontBody: 'Paragraph font',
-    fontTitle: 'Title font (optional — leave as paragraph font if unsure)',
-    groomName: "Groom's name",
-    brideName: "Bride's name",
-    date: 'Wedding date',
-    rsvpDeadline: 'RSVP deadline (optional)',
-    locationName: 'Venue name (optional)',
-    locationAddress: 'Venue address (optional)',
-    mapUrl: 'Google Maps link (optional)',
-    message: 'Welcome message',
-    messageHelp: 'Shown on the main invitation page. Leave a language blank to use the template default.',
-    slug: 'Your invitation link ID',
-    slugHelp: 'Lowercase, format: groomfirstname.bridefirstname — this becomes your link.',
-    contactEmail: 'Your email (optional, so we can reach you)',
-    addRow: '+ Add',
-    remove: 'Remove',
-    time: 'Time',
-    scheduleTitle: 'Event name',
-    icon: 'Icon',
-    question: 'Question',
-    answer: 'Answer',
-    dressShow: 'Show a dress-code color palette',
-    dressColor: 'Color',
-    dressNote: 'Note shown above the colors (optional)',
-    heroUrl: 'Cover photo URL',
-    groomUrl: 'Groom photo URL',
-    brideUrl: 'Bride photo URL',
-    bgUrl: 'Background artwork URL (the "Starry Night" style — optional, leave blank for a plain light background)',
-    galleryUrls: 'Gallery photo URLs (one per line)',
-    musicUrl: 'Background music URL (.mp3, optional)',
-    submit: 'Submit for Review',
-    submitting: 'Submitting…',
-    required: 'Required',
-    optional: 'Optional',
-    successTitle: 'Submitted!',
-    successMsg: 'Your invitation has been sent for review. We will reach out once it is approved and live.',
-    errorGeneric: 'Something went wrong. Please try again.',
-    missingFields: 'Please fill in the required fields.',
-    previewAlt: 'Template preview'
-  },
-  ja: {
-    title: '招待状をカスタマイズ',
-    back: '← カタログに戻る',
-    sectionBasics: '基本情報',
-    sectionVenue: '会場・メッセージ',
-    sectionSchedule: '進行スケジュール',
-    sectionFaq: 'Q&A',
-    sectionDress: 'ドレスコード',
-    sectionMedia: '写真・音楽（URL）',
-    sectionDesign: '配色・フォント',
-    colorPrimary: 'アクセントカラー（デフォルトはゴールド）',
-    colorText: 'メインテキストの色',
-    colorBgTint: 'ページの色合い',
-    colorCard: 'ブロック／カードの背景色',
-    colorBorder: '写真の枠線の色',
-    fontBody: '本文のフォント',
-    fontTitle: 'タイトルのフォント（任意・わからない場合は本文と同じでOK）',
-    groomName: '新郎のお名前',
-    brideName: '新婦のお名前',
-    date: '挙式日',
-    rsvpDeadline: '返信期限（任意）',
-    locationName: '会場名（任意）',
-    locationAddress: '会場の住所（任意）',
-    mapUrl: 'Google マップのリンク（任意）',
-    message: 'ウェルカムメッセージ',
-    messageHelp: '招待状トップページに表示されます。空欄の言語はテンプレートの標準文になります。',
-    slug: '招待状のリンクID',
-    slugHelp: '小文字で「新郎名.新婦名」の形式にしてください。これがリンクになります。',
-    contactEmail: 'メールアドレス（任意、ご連絡用）',
-    addRow: '＋ 追加',
-    remove: '削除',
-    time: '時刻',
-    scheduleTitle: '項目名',
-    icon: 'アイコン',
-    question: '質問',
-    answer: '回答',
-    dressShow: 'ドレスコードのカラーパレットを表示する',
-    dressColor: '色',
-    dressNote: '色の上に表示する説明文（任意）',
-    heroUrl: 'カバー写真のURL',
-    groomUrl: '新郎写真のURL',
-    brideUrl: '新婦写真のURL',
-    bgUrl: '背景アートのURL（「星月夜」スタイル・任意、空欄なら無地の明るい背景になります）',
-    galleryUrls: 'ギャラリー写真のURL（1行に1つ）',
-    musicUrl: 'BGMのURL（.mp3、任意）',
-    submit: '確認のため送信',
-    submitting: '送信中…',
-    required: '必須',
-    optional: '任意',
-    successTitle: '送信完了！',
-    successMsg: '招待状を送信しました。承認されましたらご連絡いたします。',
-    errorGeneric: '問題が発生しました。もう一度お試しください。',
-    missingFields: '必須項目を入力してください。',
-    previewAlt: 'テンプレートのプレビュー'
-  },
-  my: {
-    title: 'သင့်ဖိတ်စာကို စိတ်ကြိုက်ပြင်ပါ',
-    back: '← တမ်ပလိတ်များသို့ ပြန်သွားမည်',
-    sectionBasics: 'အခြေခံ အချက်အလက်',
-    sectionVenue: 'ခမ်းမနှင့် စာသား',
-    sectionSchedule: 'အစီအစဉ်',
-    sectionFaq: 'မေးခွန်းများ',
-    sectionDress: 'ဝတ်စားဆင်ယင်မှု',
-    sectionMedia: 'ဓာတ်ပုံ နှင့် သီချင်း (URL)',
-    sectionDesign: 'အရောင် နှင့် Font',
-    colorPrimary: 'အဓိက အရောင် (ပုံသေမှာ gold)',
-    colorText: 'စာသား အရောင်',
-    colorBgTint: 'စာမျက်နှာ အရောင်',
-    colorCard: 'Block/Card နောက်ခံ အရောင်',
-    colorBorder: 'ဓာတ်ပုံ ဘောင် အရောင်',
-    fontBody: 'စာကိုယ် Font',
-    fontTitle: 'ခေါင်းစီး Font (ရွေးချယ်နိုင်သည် — မသေချာပါက စာကိုယ်နှင့်တူအောင်ထားပါ)',
-    groomName: 'မင်္ဂလာဖူးသူ အမည်',
-    brideName: 'မင်္ဂလာဆောင်သူ အမည်',
-    date: 'မင်္ဂလာပွဲ ရက်စွဲ',
-    rsvpDeadline: 'အကြောင်းပြန်ရန် နောက်ဆုံးရက် (ရွေးချယ်နိုင်သည်)',
-    locationName: 'ခမ်းမအမည် (ရွေးချယ်နိုင်သည်)',
-    locationAddress: 'ခမ်းမလိပ်စာ (ရွေးချယ်နိုင်သည်)',
-    mapUrl: 'Google Maps လင့်ခ် (ရွေးချယ်နိုင်သည်)',
-    message: 'နှုတ်ဆက်စာသား',
-    messageHelp: 'ဖိတ်စာ ပင်မစာမျက်နှာတွင် ပြပါမည်။ ဘာသာစကား တစ်ခုကို အလွတ်ထားပါက တမ်ပလိတ် standard စာသားကို အသုံးပြုပါမည်။',
-    slug: 'သင့်ဖိတ်စာ လင့်ခ် ID',
-    slugHelp: 'စာလုံးသေး၊ ပုံစံ: groom.bride — ဤသည်မှာ သင့်လင့်ခ်ဖြစ်လာမည်။',
-    contactEmail: 'သင့်အီးမေးလ် (ရွေးချယ်နိုင်သည်)',
-    addRow: '+ ထပ်ထည့်မည်',
-    remove: 'ဖယ်ရှားမည်',
-    time: 'အချိန်',
-    scheduleTitle: 'အစီအစဉ် အမည်',
-    icon: 'Icon',
-    question: 'မေးခွန်း',
-    answer: 'အဖြေ',
-    dressShow: 'ဝတ်စားဆင်ယင်မှု အရောင်များ ပြမည်',
-    dressColor: 'အရောင်',
-    dressNote: 'အရောင်များအပေါ်တွင် ပြသည့် မှတ်ချက် (ရွေးချယ်နိုင်သည်)',
-    heroUrl: 'မျက်နှာဖုံးဓာတ်ပုံ URL',
-    groomUrl: 'မင်္ဂလာဖူးသူ ဓာတ်ပုံ URL',
-    brideUrl: 'မင်္ဂလာဆောင်သူ ဓာတ်ပုံ URL',
-    bgUrl: 'နောက်ခံပန်းချီ URL ("ကြယ်စုံည" style — ရွေးချယ်နိုင်သည်၊ အလွတ်ထားပါက ရိုးရှင်းသော အလင်းနောက်ခံ ဖြစ်မည်)',
-    galleryUrls: 'ဓာတ်ပုံများ URL (တစ်လိုင်းလျှင် တစ်ခု)',
-    musicUrl: 'နောက်ခံသီချင်း URL (.mp3, ရွေးချယ်နိုင်သည်)',
-    submit: 'စစ်ဆေးရန် တင်ပြမည်',
-    submitting: 'တင်ပြနေသည်…',
-    required: 'လိုအပ်သည်',
-    optional: 'ရွေးချယ်နိုင်သည်',
-    successTitle: 'တင်ပြပြီးပါပြီ!',
-    successMsg: 'သင့်ဖိတ်စာကို စစ်ဆေးရန် ပေးပို့ပြီးပါပြီ။ အတည်ပြုပြီးပါက ဆက်သွယ်ပေးပါမည်။',
-    errorGeneric: 'တစ်ခုခု မှားယွင်းနေသည်။ ထပ်ကြိုးစားပါ။',
-    missingFields: 'လိုအပ်သော အကွက်များကို ဖြည့်ပါ။',
-    previewAlt: 'တမ်ပလိတ် နမူနာ'
+  if (field.kind === 'list') {
+    const entries = value as EditableValue[];
+    return (
+      <fieldset className="rounded-lg border border-stone-200 p-3">
+        <legend className="px-1 text-sm font-medium">{field.label}</legend>
+        {entries.map((entry, index) => {
+          const update = (next: EditableValue) => onChange(entries.map((row, i) => i === index ? next : row));
+          return <div className="border-b border-stone-200 pb-3 mb-3" key={index}>
+            <p className="text-xs text-stone-500 mb-2">Entry {index + 1}</p>
+            {field.item
+              ? <FieldEditor field={field.item} value={entry} onChange={update} />
+              : <Fields fields={field.fields ?? []} value={entry as Draft} onChange={update} />}
+            <button type="button" className="mt-2 text-xs text-rose-800 underline" onClick={() => onChange(entries.filter((_, i) => i !== index))}>Remove entry {index + 1}</button>
+          </div>;
+        })}
+        <button type="button" disabled={entries.length >= (field.max ?? 20)} className="border border-stone-300 rounded-lg px-3 py-1.5 text-sm disabled:opacity-40" onClick={() => {
+          const entry = field.item ? initialValue(field.item, field.item.kind === 'color' ? '#7A8154' : undefined)
+            : Object.fromEntries((field.fields ?? []).map(child => [child.key, initialValue(child)]));
+          onChange([...entries, entry]);
+        }}>Add entry</button>
+      </fieldset>
+    );
   }
-};
 
-const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 20);
+  if (field.kind === 'toggle') return <label className="flex gap-2 items-center text-sm">
+    <input type="checkbox" checked={value === true} onChange={event => onChange(event.target.checked)} /> {field.label}
+  </label>;
 
-interface Props {
-  templateId: string;
-  lang: Language;
-  setLang: (l: Language) => void;
+  const string = typeof value === 'string' ? value : '';
+  const title = field.label + (field.required ? ' *' : '');
+  if (field.kind === 'color') return <div>
+    <span className="text-sm font-medium">{title}</span>
+    <div className="flex items-center gap-2 mt-1">
+      <input type="color" aria-label={field.label + ' color picker'} value={/^#[\da-f]{6}$/i.test(string) ? string : '#7A8154'} onChange={event => onChange(event.target.value)} />
+      <input className="rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm w-28" aria-label={field.label + ' hex color'} placeholder="#7A8154" value={string} maxLength={7} onChange={event => onChange(event.target.value)} />
+      {!field.required && <button type="button" className="text-xs underline" onClick={() => onChange('')}>Use default</button>}
+    </div>
+  </div>;
+
+  return <label className="block text-sm font-medium">
+    {title}
+    {field.kind === 'select'
+      ? <select className={inputStyle} value={string} onChange={event => onChange(event.target.value)}>
+          {!field.required && <option value="">Template default</option>}
+          {field.options?.map(option => <option key={option} value={option}>{option.replace(/"/g, '')}</option>)}
+        </select>
+      : field.kind === 'textarea'
+        ? <textarea rows={3} className={inputStyle} maxLength={field.max} value={string} onChange={event => onChange(event.target.value)} />
+        : <input type={['date', 'time', 'url'].includes(field.kind) ? field.kind : field.kind === 'map' ? 'url' : 'text'} className={inputStyle} maxLength={field.max} value={string} onChange={event => onChange(event.target.value)} />}
+  </label>;
 }
 
-const CustomizeForm: React.FC<Props> = ({ templateId, lang, setLang }) => {
-  const t = T[lang];
-  const [template, setTemplate] = useState<TemplateEntry | null>(null);
-
-  // Basics
-  const [groomNameEn, setGroomNameEn] = useState('');
-  const [brideNameEn, setBrideNameEn] = useState('');
-  const [date, setDate] = useState('');
-  const [rsvpDeadline, setRsvpDeadline] = useState('');
-  const [slugTouched, setSlugTouched] = useState(false);
-  const [slug, setSlug] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-
-  // Venue & message
-  const [locationNameEn, setLocationNameEn] = useState('');
-  const [locationAddressEn, setLocationAddressEn] = useState('');
-  const [mapUrl, setMapUrl] = useState('');
-  const [messageEn, setMessageEn] = useState('');
-  const [messageJa, setMessageJa] = useState('');
-  const [messageMy, setMessageMy] = useState('');
-
-  // Schedule
-  const [schedule, setSchedule] = useState<ScheduleRow[]>([{ time: '', titleEn: '', icon: 'reception' }]);
-
-  // FAQ
-  const [faq, setFaq] = useState<FaqRow[]>([{ questionEn: '', answerEn: '', icon: 'info' }]);
-
-  // Dress code
-  const [dressShow, setDressShow] = useState(false);
-  const [dressColors, setDressColors] = useState<string[]>(['#C5A059', '#4A4A4A']);
-  const [dressNote, setDressNote] = useState('');
-
-  // Media (all by URL — no uploads)
-  const [heroUrl, setHeroUrl] = useState('');
-  const [groomUrl, setGroomUrl] = useState('');
-  const [brideUrl, setBrideUrl] = useState('');
-  const [bgUrl, setBgUrl] = useState('');
-  const [galleryUrlsText, setGalleryUrlsText] = useState('');
-  const [musicUrl, setMusicUrl] = useState('');
-
-  // Colors & fonts (all optional — blank means "use the template's defaults")
-  const [colorPrimary, setColorPrimary] = useState('');
-  const [colorText, setColorText] = useState('');
-  const [colorBgTint, setColorBgTint] = useState('');
-  const [colorCard, setColorCard] = useState('');
-  const [colorBorder, setColorBorder] = useState('');
-  const [fontEn, setFontEn] = useState('');
-  const [fontJa, setFontJa] = useState('');
-  const [fontMy, setFontMy] = useState('');
-  const [titleFontEn, setTitleFontEn] = useState('');
-  const [titleFontJa, setTitleFontJa] = useState('');
-  const [titleFontMy, setTitleFontMy] = useState('');
-
-  const [hp, setHp] = useState(''); // honeypot
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'done' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState('');
+function Preview({ data, language }: { data: WeddingData | null; language: Language }) {
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [width, setWidth] = useState<'mobile' | 'wide'>('mobile');
+  const [frameKey, setFrameKey] = useState(0);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    fetch('./templates.json')
-      .then(res => res.json())
-      .then((list: TemplateEntry[]) => setTemplate(list.find(x => x.id === templateId) || null))
-      .catch(() => setTemplate(null));
+    function handleMessage(event: MessageEvent) {
+      if (event.origin === window.location.origin && event.source === frame.current?.contentWindow && event.data?.type === 'amore:preview-ready') setReady(true);
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  useEffect(() => {
+    if (ready && data) frame.current?.contentWindow?.postMessage({ type: 'amore:invitation-preview', data, language }, window.location.origin);
+  }, [data, language, ready]);
+
+  return <aside id="invitation-preview" className="min-w-0 lg:sticky lg:top-5 self-start">
+    <div className="flex flex-wrap gap-2 justify-between items-center mb-3">
+      <h2 className="text-xl font-serif">Live preview</h2>
+      <div className="flex gap-3 text-xs">
+        <button type="button" aria-pressed={width === 'mobile'} className={width === 'mobile' ? 'underline font-bold' : ''} onClick={() => setWidth('mobile')}>Phone</button>
+        <button type="button" aria-pressed={width === 'wide'} className={width === 'wide' ? 'underline font-bold' : ''} onClick={() => setWidth('wide')}>Wide</button>
+        <button type="button" onClick={() => { setReady(false); setFrameKey(value => value + 1); }}>Replay envelope</button>
+      </div>
+    </div>
+    {!data && <p className="text-sm mb-3 text-stone-600">Complete the required fields and correct invalid values to update the preview.</p>}
+    <div className="bg-stone-200 rounded-2xl p-2 flex justify-center">
+      <iframe key={frameKey} title="Live wedding invitation preview" src="?mode=preview" className={'bg-white rounded-xl w-full h-[640px] ' + (width === 'mobile' ? 'max-w-[390px]' : '')} onLoad={() => {
+        if (data) frame.current?.contentWindow?.postMessage({ type: 'amore:invitation-preview', data, language }, window.location.origin);
+      }} ref={frame} />
+    </div>
+    <p className="mt-3 text-xs text-stone-600">Preview only. RSVP submissions are disabled here.</p>
+  </aside>;
+}
+
+export default function CustomizeForm({ templateId, lang, setLang }: Props) {
+  const [seed, setSeed] = useState<WeddingData | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [slug, setSlug] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [hp, setHp] = useState('');
+  const [status, setStatus] = useState<'loading' | 'idle' | 'sending' | 'done' | 'failed'>('loading');
+  const [errors, setErrors] = useState<string[]>([]);
+  const errorRef = useRef<HTMLDivElement>(null);
+  const busy = useRef(false);
+
+  useEffect(() => {
+    if (!templateIds.includes(templateId)) { setStatus('failed'); return; }
+    const controller = new AbortController();
+    fetch(`./templates/${templateId}.json`, { signal: controller.signal }).then(response => {
+      if (!response.ok) throw new Error('Template unavailable');
+      return response.json() as Promise<WeddingData>;
+    }).then(data => {
+      setSeed(data);
+      setDraft(createDraft(data));
+      setStatus('idle');
+    }).catch(() => { if (!controller.signal.aborted) setStatus('failed'); });
+    return () => controller.abort();
   }, [templateId]);
 
-  const suggestedSlug = useMemo(() => {
-    const g = slugify(groomNameEn.split(' ')[0] || '');
-    const b = slugify(brideNameEn.split(' ')[0] || '');
-    return g && b ? `${g}.${b}` : '';
-  }, [groomNameEn, brideNameEn]);
+  const preview = useMemo(() => {
+    if (!seed || !draft) return null;
+    const result = validateSubmission({ templateId, slug: 'sample.couple', publishConsent: true, customization: draft });
+    if (!result.value) return null;
+    const data = buildInvitation(seed, result.value.customization);
+    const hidePlaceholders = (url: string) => url.includes('[event-folder]') ? '' : url;
+    return {
+      ...data,
+      images: { ...data.images, hero: hidePlaceholders(data.images.hero), groom: hidePlaceholders(data.images.groom), bride: hidePlaceholders(data.images.bride) },
+      gallery: data.gallery.filter(url => !url.includes('[event-folder]')),
+    };
+  }, [draft, seed, templateId]);
 
-  useEffect(() => {
-    if (!slugTouched) setSlug(suggestedSlug);
-  }, [suggestedSlug, slugTouched]);
+  useEffect(() => { if (errors.length) errorRef.current?.focus(); }, [errors]);
 
-  const canSubmit = groomNameEn.trim() && brideNameEn.trim() && date && slug.trim() && status !== 'submitting';
-
-  const handleSubmit = async () => {
-    if (!canSubmit) {
-      setErrorMsg(t.missingFields);
-      setStatus('error');
-      return;
-    }
-    setStatus('submitting');
-    setErrorMsg('');
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy.current || status === 'done') return;
+    const payload = { templateId, slug: slug.trim(), publishConsent: consent, customization: draft, hp };
+    const result = validateSubmission(payload);
+    if (!result.value) { setErrors(result.errors); return; }
+    if (!apiBase) { setErrors(['Submission is unavailable. Contact the studio to review this draft.']); return; }
+    setErrors([]);
+    busy.current = true;
+    setStatus('sending');
     try {
-      const res = await fetch(`${API_BASE}/api/create-invitation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          templateId,
-          slug: slug.trim(),
-          groomNameEn: groomNameEn.trim(),
-          brideNameEn: brideNameEn.trim(),
-          date,
-          rsvpDeadline,
-          locationNameEn,
-          locationAddressEn,
-          mapUrl,
-          messageEn,
-          messageJa,
-          messageMy,
-          contactEmail,
-          schedule: schedule.filter(r => r.time.trim() && r.titleEn.trim()),
-          faq: faq.filter(r => r.questionEn.trim() && r.answerEn.trim()),
-          dressCode: { show: dressShow, colors: dressColors.filter(Boolean), note: dressNote },
-          heroUrl,
-          groomUrl,
-          brideUrl,
-          bgUrl,
-          galleryUrls: galleryUrlsText.split('\n').map(s => s.trim()).filter(Boolean),
-          musicUrl,
-          theme: { primary: colorPrimary, text: colorText, backgroundTint: colorBgTint, cardBackground: colorCard, border: colorBorder },
-          fonts: { en: fontEn, ja: fontJa, my: fontMy },
-          titleFonts: { en: titleFontEn, ja: titleFontJa, my: titleFontMy },
-          hp
-        })
+      const response = await fetch(`${apiBase}/api/create-invitation`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setErrorMsg(data.error || t.errorGeneric);
-        setStatus('error');
+      const data = await response.json();
+      if (!response.ok || data.success !== true) {
+        setErrors(Array.isArray(data.errors) && data.errors.length ? data.errors : [data.error || 'The invitation could not be submitted.']);
+        setStatus('idle');
         return;
       }
       setStatus('done');
     } catch {
-      setErrorMsg(t.errorGeneric);
-      setStatus('error');
+      setErrors(['The submission could not be confirmed. Try again using the same link ID and details.']);
+      setStatus('idle');
+    } finally {
+      busy.current = false;
     }
-  };
+  }
 
-  return (
-    <div className="min-h-screen bg-[#F5F0E6]">
-      <div className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <div>
-          <a href="?mode=catalog" className="text-xs text-gray-400 hover:text-[#C5A059]">{t.back}</a>
-          <h1 className="text-xl font-semibold text-[#4A4A4A]" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            {t.title}
-          </h1>
-        </div>
-        <LanguageSwitch current={lang} onChange={setLang} />
-      </div>
-
-      <div className="flex-1 flex items-start justify-center px-4 py-8">
-        <div className="w-full max-w-lg mx-auto">
-          {status === 'done' ? (
-            <div className="bg-white rounded-2xl shadow-sm p-10 text-center">
-              <div className="text-5xl mb-4">🎉</div>
-              <h2 className="text-xl font-semibold text-[#4A4A4A] mb-2">{t.successTitle}</h2>
-              <p className="text-sm text-gray-500">{t.successMsg}</p>
+  const templateName = templateId === 'ivory_olive' ? 'Ivory & Olive' : 'Starry Night';
+  return <div className="min-h-screen bg-[#F5F0E6] text-[#393632]">
+    <header className="bg-white px-5 py-4 border-b border-stone-200">
+      <a href="?mode=catalog" className="text-sm underline">← Back to templates</a>
+      <h1 className="font-serif text-3xl mt-2">Customize your invitation</h1>
+      <p className="text-sm text-stone-600 mt-1">{templateName}</p>
+      <a href="#invitation-preview" className="text-sm underline lg:hidden">Jump to preview</a>
+      <LanguageSwitch current={lang} onChange={setLang} />
+    </header>
+    <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+      {status === 'loading' && <p role="status">Loading template…</p>}
+      {status === 'failed' && <p role="alert">This template is unavailable. <a className="underline" href="?mode=catalog">Choose a template</a>.</p>}
+      {status === 'done' && <div role="status" className="rounded-xl bg-white p-6">
+        <h2 className="text-2xl font-serif">Invitation sent for review</h2>
+        <p className="mt-2">Reference: <strong>{slug.trim()}</strong>. Your invitation goes live after the studio reviews and publishes it.</p>
+      </div>}
+      {draft && status !== 'done' && <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <form noValidate onSubmit={submit} className="min-w-0 space-y-4">
+          <p className="text-sm">Edit the text, photos, colors, and sections below. The language switch controls the preview. Use the English, Japanese, and Burmese fields to enter translations.</p>
+          <fieldset disabled={status === 'sending'} className="space-y-4">
+            {sections.map((section, index) => <details key={section.title} open={index === 0 ? true : undefined} className="bg-white rounded-xl border border-stone-200">
+              <summary className="cursor-pointer px-4 py-3 font-semibold">{section.title}</summary>
+              <div className="px-4 pb-4">
+                {section.title === 'Photos & music' && <p className="text-sm text-stone-600 mb-3">Paste direct HTTPS media links. Leave a photo blank to use the template’s default or upload it through the studio after review.</p>}
+                <Fields fields={section.fields} value={draft} onChange={next => setDraft(next as Draft)} />
+              </div>
+            </details>)}
+            <div className="bg-white rounded-xl border border-stone-200 p-4">
+              <label className="block text-sm font-medium">Invitation link ID *
+                <input className={inputStyle} placeholder="groom.bride" value={slug} maxLength={41} autoCapitalize="none" autoComplete="off" onChange={event => setSlug(event.target.value)} />
+              </label>
+              <label className="flex items-start gap-2 text-sm mt-4">
+                <input type="checkbox" checked={consent} onChange={event => setConsent(event.target.checked)} className="mt-1" />
+                <span>I understand the submitted invitation text and media links will be visible in a public GitHub pull request before the invitation goes live. I have permission to share them.</span>
+              </label>
+              <div hidden aria-hidden="true"><input tabIndex={-1} autoComplete="off" value={hp} onChange={event => setHp(event.target.value)} /></div>
+              {errors.length > 0 && <div role="alert" tabIndex={-1} ref={errorRef} className="my-4 rounded-lg bg-rose-50 text-rose-900 p-3 text-sm">
+                <strong>Check the draft</strong><ul className="list-disc pl-5 mt-1">{errors.map((error, index) => <li key={index}>{error}</li>)}</ul>
+              </div>}
+              <button className="mt-4 rounded-lg bg-[#565B41] px-5 py-3 text-white disabled:opacity-50" disabled={status === 'sending'}>{status === 'sending' ? 'Submitting…' : 'Submit for studio review'}</button>
             </div>
-          ) : (
-            <div className="space-y-5">
-              {template && (
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                  <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                    <img src={template.previewImage} alt={t.previewAlt} className="w-full h-full object-cover" />
-                  </div>
-                </div>
-              )}
-
-              <Section title={t.sectionBasics}>
-                <Field label={t.groomName} badge={t.required}>
-                  <input className="input" value={groomNameEn} onChange={e => setGroomNameEn(e.target.value)} />
-                </Field>
-                <Field label={t.brideName} badge={t.required}>
-                  <input className="input" value={brideNameEn} onChange={e => setBrideNameEn(e.target.value)} />
-                </Field>
-                <Field label={t.date} badge={t.required}>
-                  <input type="date" className="input" value={date} onChange={e => setDate(e.target.value)} />
-                </Field>
-                <Field label={t.rsvpDeadline} badge={t.optional}>
-                  <input type="date" className="input" value={rsvpDeadline} onChange={e => setRsvpDeadline(e.target.value)} />
-                </Field>
-                <Field label={t.slug} badge={t.required}>
-                  <input
-                    className="input"
-                    value={slug}
-                    onChange={e => { setSlugTouched(true); setSlug(e.target.value.toLowerCase()); }}
-                    placeholder="groom.bride"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">{t.slugHelp}</p>
-                </Field>
-                <Field label={t.contactEmail} badge={t.optional}>
-                  <input type="email" className="input" value={contactEmail} onChange={e => setContactEmail(e.target.value)} />
-                </Field>
-              </Section>
-
-              <Section title={t.sectionVenue}>
-                <Field label={t.locationName} badge={t.optional}>
-                  <input className="input" value={locationNameEn} onChange={e => setLocationNameEn(e.target.value)} />
-                </Field>
-                <Field label={t.locationAddress} badge={t.optional}>
-                  <textarea className="input" rows={2} value={locationAddressEn} onChange={e => setLocationAddressEn(e.target.value)} />
-                </Field>
-                <Field label={t.mapUrl} badge={t.optional}>
-                  <input className="input" value={mapUrl} onChange={e => setMapUrl(e.target.value)} />
-                </Field>
-                <Field label={`${t.message} — EN`} badge={t.optional}>
-                  <textarea className="input" rows={3} value={messageEn} onChange={e => setMessageEn(e.target.value)} />
-                </Field>
-                <Field label={`${t.message} — 日本語`} badge={t.optional}>
-                  <textarea className="input" rows={3} value={messageJa} onChange={e => setMessageJa(e.target.value)} />
-                </Field>
-                <Field label={`${t.message} — မြန်မာ`} badge={t.optional}>
-                  <textarea className="input" rows={3} value={messageMy} onChange={e => setMessageMy(e.target.value)} />
-                </Field>
-                <p className="text-xs text-gray-400">{t.messageHelp}</p>
-              </Section>
-
-              <Section title={t.sectionSchedule}>
-                {schedule.map((row, i) => (
-                  <div key={i} className="flex gap-2 items-start">
-                    <input className="input w-24" placeholder={t.time} value={row.time}
-                      onChange={e => setSchedule(prev => prev.map((r, idx) => idx === i ? { ...r, time: e.target.value } : r))} />
-                    <input className="input flex-1" placeholder={t.scheduleTitle} value={row.titleEn}
-                      onChange={e => setSchedule(prev => prev.map((r, idx) => idx === i ? { ...r, titleEn: e.target.value } : r))} />
-                    <select className="input w-28" value={row.icon}
-                      onChange={e => setSchedule(prev => prev.map((r, idx) => idx === i ? { ...r, icon: e.target.value } : r))}>
-                      {SCHEDULE_ICONS.map(ic => <option key={ic} value={ic}>{ic}</option>)}
-                    </select>
-                    <button type="button" onClick={() => setSchedule(prev => prev.filter((_, idx) => idx !== i))}
-                      className="text-xs text-gray-400 hover:text-red-500 px-1 py-2">{t.remove}</button>
-                  </div>
-                ))}
-                <button type="button"
-                  onClick={() => setSchedule(prev => [...prev, { time: '', titleEn: '', icon: 'reception' }])}
-                  className="text-sm border border-dashed border-[#C5A059] text-[#C5A059] rounded-lg py-2 w-full hover:bg-[#fdf8f0]">
-                  {t.addRow}
-                </button>
-              </Section>
-
-              <Section title={t.sectionFaq}>
-                {faq.map((row, i) => (
-                  <div key={i} className="border border-gray-100 rounded-lg p-3 space-y-2">
-                    <div className="flex gap-2">
-                      <input className="input flex-1" placeholder={t.question} value={row.questionEn}
-                        onChange={e => setFaq(prev => prev.map((r, idx) => idx === i ? { ...r, questionEn: e.target.value } : r))} />
-                      <select className="input w-28" value={row.icon}
-                        onChange={e => setFaq(prev => prev.map((r, idx) => idx === i ? { ...r, icon: e.target.value } : r))}>
-                        {FAQ_ICONS.map(ic => <option key={ic} value={ic}>{ic}</option>)}
-                      </select>
-                    </div>
-                    <textarea className="input" rows={2} placeholder={t.answer} value={row.answerEn}
-                      onChange={e => setFaq(prev => prev.map((r, idx) => idx === i ? { ...r, answerEn: e.target.value } : r))} />
-                    <button type="button" onClick={() => setFaq(prev => prev.filter((_, idx) => idx !== i))}
-                      className="text-xs text-gray-400 hover:text-red-500">{t.remove}</button>
-                  </div>
-                ))}
-                <button type="button"
-                  onClick={() => setFaq(prev => [...prev, { questionEn: '', answerEn: '', icon: 'info' }])}
-                  className="text-sm border border-dashed border-[#C5A059] text-[#C5A059] rounded-lg py-2 w-full hover:bg-[#fdf8f0]">
-                  {t.addRow}
-                </button>
-              </Section>
-
-              <Section title={t.sectionDress}>
-                <label className="flex items-center gap-2 text-sm text-[#4A4A4A]">
-                  <input type="checkbox" checked={dressShow} onChange={e => setDressShow(e.target.checked)} />
-                  {t.dressShow}
-                </label>
-                {dressShow && (
-                  <>
-                    <div className="flex gap-2 flex-wrap">
-                      {dressColors.map((c, i) => (
-                        <div key={i} className="flex items-center gap-1">
-                          <input type="color" value={c} onChange={e => setDressColors(prev => prev.map((x, idx) => idx === i ? e.target.value : x))} />
-                          <button type="button" onClick={() => setDressColors(prev => prev.filter((_, idx) => idx !== i))}
-                            className="text-xs text-gray-400 hover:text-red-500">✕</button>
-                        </div>
-                      ))}
-                      <button type="button" onClick={() => setDressColors(prev => [...prev, '#C5A059'])}
-                        className="text-xs border border-dashed border-[#C5A059] text-[#C5A059] rounded px-2">{t.addRow}</button>
-                    </div>
-                    <Field label={t.dressNote} badge={t.optional}>
-                      <input className="input" value={dressNote} onChange={e => setDressNote(e.target.value)} />
-                    </Field>
-                  </>
-                )}
-              </Section>
-
-              <Section title={t.sectionMedia}>
-                <Field label={t.heroUrl} badge={t.optional}>
-                  <input className="input" value={heroUrl} onChange={e => setHeroUrl(e.target.value)} placeholder="https://…" />
-                </Field>
-                <Field label={t.groomUrl} badge={t.optional}>
-                  <input className="input" value={groomUrl} onChange={e => setGroomUrl(e.target.value)} placeholder="https://…" />
-                </Field>
-                <Field label={t.brideUrl} badge={t.optional}>
-                  <input className="input" value={brideUrl} onChange={e => setBrideUrl(e.target.value)} placeholder="https://…" />
-                </Field>
-                <Field label={t.bgUrl} badge={t.optional}>
-                  <input className="input" value={bgUrl} onChange={e => setBgUrl(e.target.value)} placeholder="https://…" />
-                </Field>
-                <Field label={t.galleryUrls} badge={t.optional}>
-                  <textarea className="input" rows={3} value={galleryUrlsText} onChange={e => setGalleryUrlsText(e.target.value)} placeholder="https://…\nhttps://…" />
-                </Field>
-                <Field label={t.musicUrl} badge={t.optional}>
-                  <input className="input" value={musicUrl} onChange={e => setMusicUrl(e.target.value)} placeholder="https://…" />
-                </Field>
-              </Section>
-
-              <Section title={t.sectionDesign}>
-                <div className="grid grid-cols-2 gap-3">
-                  <ColorField label={t.colorPrimary} value={colorPrimary} onChange={setColorPrimary} />
-                  <ColorField label={t.colorText} value={colorText} onChange={setColorText} />
-                  <ColorField label={t.colorBgTint} value={colorBgTint} onChange={setColorBgTint} />
-                  <ColorField label={t.colorCard} value={colorCard} onChange={setColorCard} />
-                  <ColorField label={t.colorBorder} value={colorBorder} onChange={setColorBorder} />
-                </div>
-
-                <Field label={`${t.fontBody} — EN`} badge={t.optional}>
-                  <select className="input" value={fontEn} onChange={e => setFontEn(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.en.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-                <Field label={`${t.fontBody} — 日本語`} badge={t.optional}>
-                  <select className="input" value={fontJa} onChange={e => setFontJa(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.ja.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-                <Field label={`${t.fontBody} — မြန်မာ`} badge={t.optional}>
-                  <select className="input" value={fontMy} onChange={e => setFontMy(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.my.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-
-                <Field label={`${t.fontTitle} — EN`} badge={t.optional}>
-                  <select className="input" value={titleFontEn} onChange={e => setTitleFontEn(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.en.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-                <Field label={`${t.fontTitle} — 日本語`} badge={t.optional}>
-                  <select className="input" value={titleFontJa} onChange={e => setTitleFontJa(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.ja.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-                <Field label={`${t.fontTitle} — မြန်မာ`} badge={t.optional}>
-                  <select className="input" value={titleFontMy} onChange={e => setTitleFontMy(e.target.value)}>
-                    <option value="">—</option>
-                    {FONT_OPTIONS.my.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                  </select>
-                </Field>
-              </Section>
-
-              {/* Honeypot — hidden from real users, bots that fill it get silently ignored server-side */}
-              <input
-                type="text"
-                value={hp}
-                onChange={e => setHp(e.target.value)}
-                tabIndex={-1}
-                autoComplete="off"
-                className="absolute opacity-0 pointer-events-none h-0 w-0"
-                aria-hidden="true"
-              />
-
-              {status === 'error' && <p className="text-red-500 text-sm text-center">{errorMsg}</p>}
-
-              <button
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className="w-full bg-[#C5A059] text-white rounded-xl py-4 font-medium text-base disabled:opacity-50 hover:bg-[#b8904a] transition-colors shadow-sm"
-              >
-                {status === 'submitting' ? t.submitting : t.submit}
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <style>{`.input { width: 100%; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 0.95rem; } .input:focus { outline: none; border-color: #C5A059; }`}</style>
-    </div>
-  );
-};
-
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
-    <h3 className="text-sm font-semibold text-[#C5A059] uppercase tracking-wide">{title}</h3>
-    {children}
-  </div>
-);
-
-const ColorField: React.FC<{ label: string; value: string; onChange: (v: string) => void }> = ({ label, value, onChange }) => (
-  <div>
-    <span className="text-xs text-gray-500 block mb-1">{label}</span>
-    <div className="flex items-center gap-2">
-      <input type="color" value={value || '#C5A059'} onChange={e => onChange(e.target.value)} />
-      {value && <button type="button" onClick={() => onChange('')} className="text-xs text-gray-400 hover:text-red-500">✕</button>}
-    </div>
-  </div>
-);
-
-const Field: React.FC<{ label: string; badge?: string; children: React.ReactNode }> = ({ label, badge, children }) => (
-  <div>
-    <div className="flex items-center justify-between mb-1.5">
-      <span className="text-sm font-medium text-[#4A4A4A]">{label}</span>
-      {badge && <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{badge}</span>}
-    </div>
-    {children}
-  </div>
-);
-
-export default CustomizeForm;
+          </fieldset>
+        </form>
+        <Preview data={preview} language={lang} />
+      </div>}
+    </main>
+  </div>;
+}
