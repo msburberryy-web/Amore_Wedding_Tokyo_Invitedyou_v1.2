@@ -172,6 +172,10 @@
     "https://lh3.googleusercontent.com/d/1GfgMGyvQjZ34VPZSFsxDcZFOxFbi9hFX=s1600"
   ],
   "musicUrl": "",
+  "images": {
+    "groom": "./photos/thant_ame/groom.jpg",
+    "bride": "./photos/thant_ame/bride.jpg"
+  },
   "theme": {
     "primary": "#C5A059",
     "text": "#4A4A4A",
