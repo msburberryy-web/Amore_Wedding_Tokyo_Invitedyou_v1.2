@@ -44,16 +44,7 @@
       "icon": "reception"
     },
     {
-      "time": "11:00",
-      "title": {
-        "en": "Ceremony",
-        "ja": "挙式",
-        "my": "မင်္ဂလာအခမ်းအနား"
-      },
-      "icon": "ceremony"
-    },
-    {
-      "time": "11:00",
+      "time": "11:30",
       "title": {
         "en": "Banquet Begins",
         "ja": "開宴",
