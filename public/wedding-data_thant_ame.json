@@ -155,7 +155,22 @@
       "icon": "baby"
     }
   ],
-  "showGallery": false,
+  "showGallery": true,
+  "gallery": [
+    "https://lh3.googleusercontent.com/d/1kBaRGdaoFeKR3N136QHYVzxqR9E4YU1D=s1600",
+    "https://lh3.googleusercontent.com/d/1zRJ4XaKFURp5NTYWsT6qq9O7vJtiO9nX=s1600",
+    "https://lh3.googleusercontent.com/d/1YBbnUsZ-6hpYKz2BDa4-VNNCR7c0B2ED=s1600",
+    "https://lh3.googleusercontent.com/d/1fEu2Na2NJiA1qSzz6jqpHcMFjTLmNVpr=s1600",
+    "https://lh3.googleusercontent.com/d/1FgW0wMb7wZq1M7SfhdXxgUtVfkKqtA0u=s1600",
+    "https://lh3.googleusercontent.com/d/1P_04Op1Z9IIOA5EkoxFl3exiMvNZZKAb=s1600",
+    "https://lh3.googleusercontent.com/d/1RjmZJTBg6kbKs8LzABInynV6NzGR816A=s1600",
+    "https://lh3.googleusercontent.com/d/1vAzYQnBW5ixhttNBhfIp6Sg9V2Co9XHR=s1600",
+    "https://lh3.googleusercontent.com/d/1bfDfChlQXEAl7ouUbeg0jqpuv-2psaeD=s1600",
+    "https://lh3.googleusercontent.com/d/1Jbp4ZoTExml_fCrFRMIY6flQjJYT-Zq9=s1600",
+    "https://lh3.googleusercontent.com/d/1q0CM1ENP6odGHaxqTMArcpSBIhO5D4O0=s1600",
+    "https://lh3.googleusercontent.com/d/1bosB3_2oKFDM4urnVJ4dqW5ShXOLzQd6=s1600",
+    "https://lh3.googleusercontent.com/d/1GfgMGyvQjZ34VPZSFsxDcZFOxFbi9hFX=s1600"
+  ],
   "musicUrl": "",
   "theme": {
     "primary": "#C5A059",
